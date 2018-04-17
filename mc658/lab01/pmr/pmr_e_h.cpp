@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <float.h>
+#include <queue>
 #include "pmr_e_h.h"
 //typedef vector<vector<double> > matriz;
 
@@ -32,8 +33,8 @@ int getRelations(vector<int> itens, matriz &relation, int i){
 
     int sum = 0;
 
-    for (int j : itens){
-        if(j != 0 && j != i)
+    for (int j = 0; j < itens.size(); j++){
+        if(j != i)
             sum += relation[i][j];
     }
 
@@ -46,25 +47,50 @@ int sumItens(int capacity, vector<int> s, vector<int> v, matriz &relation,
 	int value = 0;
 	int weight = 0;
 
-	for(int i = 0; i < quantItens; i++){
+	for(int i = 0; i < itens.size(); i++){
 		weight += s[i];
 		value += s[i] + getRelations(itens, relation, i);
-		if (weight > capacity) return -1;
+		//if (weight > capacity) return -1;
 	}
 
 	return value;
 }
 
-// generate all the combinations given a pivot
-// matriz generateSubSet(int pivot, int quantItens){
-//     matriz subset;
-//
-//     for(int i = pivot+1; i < quantItens; i++){
-//         matriz result = generateSubSet(i, quantItens);
-//         subset.insert();
-//     }
-//
-//     return subset;
+// generate all the combinations
+std::vector<std::vector<int> > generateCombinations(int quantItens){
+  queue < vector<int> > fila;
+  std::vector<std::vector<int> > combinations;
+
+  for(int i = 0; i < quantItens; i++){
+    std::vector<int> v;
+    v.push_back(i);
+    fila.push(v);
+  }
+
+  while (!fila.empty()) {
+    std::vector<int> k = fila.front();
+
+    combinations.push_back(k);
+
+    // for(int i = 0; i < k.size(); i++)
+    //   std::cout << k[i] << ' ';
+    // std::cout << '\n';
+
+    for(int i = k.back()+1; i < quantItens; i++){
+      k.push_back(i);
+      fila.push(k);
+      k.pop_back();
+    }
+
+    fila.pop();
+  }
+
+  return combinations;
+}
+
+// void prepareSolution(solution sol, vector<int> itens){
+//   for(int i = 0; i < itens.size(); i++)
+//     sol->itens[itens[i]] = 1;
 // }
 
 int algE(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &relation, vector<int>& itensMochila, int maxTime)
@@ -76,20 +102,27 @@ int algE(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &rel
 	sol->value = 0;
 	sol->itens.reserve(quantItens);
 
-	// interate over items
-	for(int i = 0; i < quantItens; i++){
-		int sol_size = 1;
+  std::vector<std::vector<int> > combinations = generateCombinations(quantItens);
 
-		while(sol_size < quantItens){
-			for(int j = i + sol_size; j < quantItens; j++){
+  for(int j = 0; j < combinations.size(); j++){
+    std::vector<int> v = combinations[j];
 
+    // print combination
+    for(int i = 0; i < v.size(); i++){
+        std::cout << v[i] << ' ';
+    }
+    std::cout << '\n';
 
+    int soma = sumItens(capacity, s, v, relation, v, quantItens);
+    std::cout << "soma: " << soma << '\n';
+    if (soma > sol->value){
+      sol->value = soma;
+      sol->itens = v;
+    }
+  }
 
-			}
-		}
-
-	}
-
+  for(int i = 0; i < sol->itens.size(); i++)
+    itensMochila[sol->itens[i]] = 1;
 
 	return sol->value;
 }
