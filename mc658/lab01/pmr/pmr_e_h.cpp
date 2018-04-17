@@ -35,7 +35,7 @@ int getRelations(vector<int> itens, matriz &relation, int i){
 
     for (int j = 0; j < itens.size(); j++){
         if(j != i)
-            sum += relation[i][j];
+            sum += relation[i][itens[j]];
     }
 
 	return sum;
@@ -48,13 +48,18 @@ int sumItens(int capacity, vector<int> s, vector<int> v, matriz &relation,
 	int weight = 0;
 
 	for(int i = 0; i < itens.size(); i++){
-		weight += s[i];
-		value += s[i] + getRelations(itens, relation, i);
-		//if (weight > capacity) return -1;
+		weight += s[itens[i]];
+		value += v[itens[i]] + getRelations(itens, relation, itens[i]);
+		if (weight > capacity){
+      std::cout << "weight: " << weight << '\n';
+      return -1;
+    }
 	}
 
 	return value;
 }
+
+//int sumWeights(vector<int> s, )
 
 // generate all the combinations
 std::vector<std::vector<int> > generateCombinations(int quantItens){
@@ -105,19 +110,19 @@ int algE(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &rel
   std::vector<std::vector<int> > combinations = generateCombinations(quantItens);
 
   for(int j = 0; j < combinations.size(); j++){
-    std::vector<int> v = combinations[j];
+    std::vector<int> aux = combinations[j];
 
     // print combination
-    for(int i = 0; i < v.size(); i++){
-        std::cout << v[i] << ' ';
+    for(int i = 0; i < aux.size(); i++){
+        std::cout << aux[i] << ' ';
     }
     std::cout << '\n';
 
-    int soma = sumItens(capacity, s, v, relation, v, quantItens);
+    int soma = sumItens(capacity, s, v, relation, aux, quantItens);
     std::cout << "soma: " << soma << '\n';
     if (soma > sol->value){
       sol->value = soma;
-      sol->itens = v;
+      sol->itens = aux;
     }
   }
 
