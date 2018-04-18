@@ -33,10 +33,16 @@ int getRelations(vector<int> itens, matriz &relation, int i){
 
     int sum = 0;
 
-    for (int j = 0; j < itens.size(); j++){
-        if(j != i)
-            sum += relation[i][itens[j]];
-    }
+    // int indice;
+    //
+    // for(indice = 0; itens[indice] == i; indice++);
+
+
+    for (int j = i; j < itens.size(); j++)
+        sum += relation[itens[i]][itens[j]];
+        if (sum != 0){
+            //std::cout << sum << ' ';
+        }
 
 	return sum;
 }
@@ -45,32 +51,38 @@ int getRelations(vector<int> itens, matriz &relation, int i){
 int sumItens(int capacity, vector<int> s, vector<int> v, matriz &relation,
 			 vector<int> itens, int quantItens){
 	int value = 0;
-	int weight = 0;
 
 	for(int i = 0; i < itens.size(); i++){
-		weight += s[itens[i]];
-		value += v[itens[i]] + getRelations(itens, relation, itens[i]);
-		if (weight > capacity){
-      std::cout << "weight: " << weight << '\n';
-      return -1;
-    }
+		value += v[itens[i]] + getRelations(itens, relation, i);
 	}
 
 	return value;
 }
 
-//int sumWeights(vector<int> s, )
+bool sumWeights(vector<int> s, vector<int> itens, int capacity){
+    int weight = 0;
+
+	for(int i = 0; i < itens.size(); i++){
+        weight += s[itens[i]];
+    }
+
+    if (weight > capacity)
+        return false;
+    return true;
+}
 
 // generate all the combinations
-std::vector<std::vector<int> > generateCombinations(int quantItens){
+std::vector<std::vector<int> > generateCombinations(int quantItens,
+int capacity, vector<int> s){
+
   queue < vector<int> > fila;
   std::vector<std::vector<int> > combinations;
 
-  for(int i = 0; i < quantItens; i++){
-    std::vector<int> v;
-    v.push_back(i);
-    fila.push(v);
-  }
+  // for(int i = 0; i < quantItens; i++){
+  //   std::vector<int> v;
+  //   v.push_back(i);
+  //   fila.push(v);
+  // }
 
   while (!fila.empty()) {
     std::vector<int> k = fila.front();
@@ -83,7 +95,10 @@ std::vector<std::vector<int> > generateCombinations(int quantItens){
 
     for(int i = k.back()+1; i < quantItens; i++){
       k.push_back(i);
-      fila.push(k);
+
+      if(sumWeights(s, k, capacity))
+        fila.push(k);
+
       k.pop_back();
     }
 
@@ -107,19 +122,19 @@ int algE(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &rel
 	sol->value = 0;
 	sol->itens.reserve(quantItens);
 
-  std::vector<std::vector<int> > combinations = generateCombinations(quantItens);
+  std::vector<std::vector<int> > combinations = generateCombinations(quantItens, capacity, s);
 
   for(int j = 0; j < combinations.size(); j++){
     std::vector<int> aux = combinations[j];
 
     // print combination
     for(int i = 0; i < aux.size(); i++){
-        std::cout << aux[i] << ' ';
+        std::cout << aux[i]+1 << " ";
     }
-    std::cout << '\n';
+     std::cout << '\n';
 
     int soma = sumItens(capacity, s, v, relation, aux, quantItens);
-    std::cout << "soma: " << soma << '\n';
+    //std::cout << "soma: " << soma << '\n';
     if (soma > sol->value){
       sol->value = soma;
       sol->itens = aux;
