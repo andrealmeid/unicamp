@@ -29,11 +29,11 @@ typedef struct _solution{
 */
 
 // sum the relations on a subset of itens
-int getRelations(vector<int> itens, matriz &relation, int i){
+int getRelations(vector<int> itens, matriz &relation, int i, int quantItens){
 
     int sum = 0;
 
-    for (int j = i; j < itens.size(); j++)
+    for (int j = i; j < itens[quantItens]; j++)
         sum += relation[itens[i]][itens[j]];
 
 	return sum;
@@ -44,17 +44,17 @@ int sumItens(int capacity, vector<int> s, vector<int> v, matriz &relation,
 			 vector<int> itens, int quantItens){
 	int value = 0;
 
-	for(int i = 0; i < itens.size(); i++){
-		value += v[itens[i]] + getRelations(itens, relation, i);
+	for(int i = 0; i < itens[quantItens]; i++){
+		value += v[itens[i]] + getRelations(itens, relation, i, quantItens);
 	}
 
 	return value;
 }
 
-bool sumWeights(vector<int> s, vector<int> itens, int capacity){
+bool sumWeights(vector<int> s, vector<int> itens, int capacity, int quantItens){
     int weight = 0;
 
-	for(int i = 0; i < itens.size(); i++){
+	for(int i = 0; i < itens[quantItens]; i++){
         weight += s[itens[i]];
     }
 
@@ -70,24 +70,28 @@ int capacity, vector<int> s){
   std::vector<std::vector<int> > combinations;
 
   for(int i = 0; i < quantItens; i++){
-    std::vector<int> v;
-    v.push_back(i);
-    fila.push(v);
+    vector<int> vv(quantItens+1);
+    vv[0] = i;
+    vv[quantItens] = 1;
+    fila.push(vv);
   }
 
-  std::vector<int> k;
   while (!fila.empty()) {
+    vector<int> k;
     k = fila.front();
 
     combinations.push_back(k);
 
-    for(int i = k.back()+1; i < quantItens; i++){
-      k.push_back(i);
+    std::cout << "i inicial: " << k[k[quantItens-1]]+1 << '\n';
+    for(int i = k[k[quantItens]-1]+1; i < quantItens; i++){
 
-      if(sumWeights(s, k, capacity))
+      k[k[quantItens]] = i;
+      k[quantItens]++;
+
+      if(sumWeights(s, k, capacity, quantItens))
         fila.push(k);
 
-      k.pop_back();
+      k[quantItens]--;
     }
 
     fila.pop();
@@ -114,8 +118,14 @@ int algE(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &rel
 
     int soma = 0;
     std::vector<int> aux;
+
     for(int j = 0; j < combinations.size(); j++){
         aux = combinations[j];
+
+        for (int i = 0; i <= quantItens; i++) {
+          cout << aux[i] << ' ';
+        }
+        cout << '\n';
 
         soma = sumItens(capacity, s, v, relation, aux, quantItens);
 
@@ -125,8 +135,12 @@ int algE(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &rel
         }
     }
 
-    for(int i = 0; i < sol->itens.size(); i++)
+    for(int i = 0; i < sol->itens[quantItens]; i++)
         itensMochila[sol->itens[i]] = 1;
+
+    for(int i = 0; i < quantItens; i++)
+      cout << itensMochila[i] << ' ';
+    cout <<   '\n';
 
     return sol->value;
 }
