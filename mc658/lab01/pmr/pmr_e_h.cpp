@@ -82,7 +82,6 @@ int capacity, vector<int> s){
 
     combinations.push_back(k);
 
-    std::cout << "i inicial: " << k[k[quantItens-1]]+1 << '\n';
     for(int i = k[k[quantItens]-1]+1; i < quantItens; i++){
 
       k[k[quantItens]] = i;
@@ -122,11 +121,6 @@ int algE(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &rel
     for(int j = 0; j < combinations.size(); j++){
         aux = combinations[j];
 
-        for (int i = 0; i <= quantItens; i++) {
-          cout << aux[i] << ' ';
-        }
-        cout << '\n';
-
         soma = sumItens(capacity, s, v, relation, aux, quantItens);
 
         if (soma > sol->value){
@@ -137,10 +131,6 @@ int algE(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &rel
 
     for(int i = 0; i < sol->itens[quantItens]; i++)
         itensMochila[sol->itens[i]] = 1;
-
-    for(int i = 0; i < quantItens; i++)
-      cout << itensMochila[i] << ' ';
-    cout <<   '\n';
 
     return sol->value;
 }
