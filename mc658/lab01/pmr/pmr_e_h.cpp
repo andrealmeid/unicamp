@@ -33,16 +33,8 @@ int getRelations(vector<int> itens, matriz &relation, int i){
 
     int sum = 0;
 
-    // int indice;
-    //
-    // for(indice = 0; itens[indice] == i; indice++);
-
-
     for (int j = i; j < itens.size(); j++)
         sum += relation[itens[i]][itens[j]];
-        if (sum != 0){
-            //std::cout << sum << ' ';
-        }
 
 	return sum;
 }
@@ -74,7 +66,6 @@ bool sumWeights(vector<int> s, vector<int> itens, int capacity){
 // generate all the combinations
 std::vector<std::vector<int> > generateCombinations(int quantItens,
 int capacity, vector<int> s){
-
   queue < vector<int> > fila;
   std::vector<std::vector<int> > combinations;
 
@@ -84,14 +75,11 @@ int capacity, vector<int> s){
     fila.push(v);
   }
 
+  std::vector<int> k;
   while (!fila.empty()) {
-    std::vector<int> k = fila.front();
+    k = fila.front();
 
     combinations.push_back(k);
-
-    // for(int i = 0; i < k.size(); i++)
-    //   std::cout << k[i] << ' ';
-    // std::cout << '\n';
 
     for(int i = k.back()+1; i < quantItens; i++){
       k.push_back(i);
@@ -122,29 +110,25 @@ int algE(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &rel
 	sol->value = 0;
 	sol->itens.reserve(quantItens);
 
-  std::vector<std::vector<int> > combinations = generateCombinations(quantItens, capacity, s);
+    std::vector<std::vector<int> > combinations = generateCombinations(quantItens, capacity, s);
 
-  for(int j = 0; j < combinations.size(); j++){
-    std::vector<int> aux = combinations[j];
+    int soma = 0;
+    std::vector<int> aux;
+    for(int j = 0; j < combinations.size(); j++){
+        aux = combinations[j];
 
-    // print combination
-    // for(int i = 0; i < aux.size(); i++){
-    //     std::cout << aux[i]+1 << " ";
-    // }
-    // std::cout << '\n';
+        soma = sumItens(capacity, s, v, relation, aux, quantItens);
 
-    int soma = sumItens(capacity, s, v, relation, aux, quantItens);
-    //std::cout << "soma: " << soma << '\n';
-    if (soma > sol->value){
-      sol->value = soma;
-      sol->itens = aux;
+        if (soma > sol->value){
+          sol->value = soma;
+          sol->itens = aux;
+        }
     }
-  }
 
-  for(int i = 0; i < sol->itens.size(); i++)
-    itensMochila[sol->itens[i]] = 1;
+    for(int i = 0; i < sol->itens.size(); i++)
+        itensMochila[sol->itens[i]] = 1;
 
-	return sol->value;
+    return sol->value;
 }
 
 int algH(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &relation, vector<int>& itensMochila, int maxTime)
