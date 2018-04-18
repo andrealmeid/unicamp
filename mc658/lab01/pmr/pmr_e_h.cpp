@@ -78,11 +78,11 @@ int capacity, vector<int> s){
   queue < vector<int> > fila;
   std::vector<std::vector<int> > combinations;
 
-  // for(int i = 0; i < quantItens; i++){
-  //   std::vector<int> v;
-  //   v.push_back(i);
-  //   fila.push(v);
-  // }
+  for(int i = 0; i < quantItens; i++){
+    std::vector<int> v;
+    v.push_back(i);
+    fila.push(v);
+  }
 
   while (!fila.empty()) {
     std::vector<int> k = fila.front();
@@ -128,10 +128,10 @@ int algE(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &rel
     std::vector<int> aux = combinations[j];
 
     // print combination
-    for(int i = 0; i < aux.size(); i++){
-        std::cout << aux[i]+1 << " ";
-    }
-     std::cout << '\n';
+    // for(int i = 0; i < aux.size(); i++){
+    //     std::cout << aux[i]+1 << " ";
+    // }
+    // std::cout << '\n';
 
     int soma = sumItens(capacity, s, v, relation, aux, quantItens);
     //std::cout << "soma: " << soma << '\n';
