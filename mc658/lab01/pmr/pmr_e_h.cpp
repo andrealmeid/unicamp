@@ -74,9 +74,8 @@ vector<vector<int> > generateCombinations(int quantItens,
   for(int i = 0; i < quantItens; i++){
     vector<int> v(quantItens+1);
     //v.reserve(quantItens+1);
-    v[0] = i;
-    v[quantItens] = 1;
-    std::cout << v.size() << '\n';
+    v[0] = -1;
+    v[quantItens] = 0;
     fila.push(v);
   }
 
@@ -98,10 +97,10 @@ vector<vector<int> > generateCombinations(int quantItens,
         soma = sumItens(capacity, s, v, relation, k, quantItens);
 
         std::cout << "itens: " << k[quantItens] << '\n';
-        
+
         for(int j = 0; j < k[quantItens]; j++)
           cout << k[j] << ' ';
-        cout << "\n soma: " << soma << '\n';
+        cout << "\nsoma: " << soma << '\n';
 
         if (soma > sol->value){
           sol->value = soma;
