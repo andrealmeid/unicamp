@@ -14,102 +14,133 @@
 #include <iostream>
 #include <float.h>
 #include <queue>
+#include <signal.h>
+#include <unistd.h>
 #include "pmr_e_h.h"
 //typedef vector<vector<double> > matriz;
 
-// solution struct
+// struct that holds a solution
 typedef struct _solution{
     int value;
     vector<int> itens;
 } solution;
 
+// global solution variable
+solution *sol;
+
+// alarm functions
+volatile sig_atomic_t timeout = 0;
+static void alarm_handler(int sig)
+{
+    timeout = 1;
+}
+
 // sum the relations of the new item with the objects that already
 // are on the solution
-int getRelations(vector<int> &itens, matriz &relation, int last, int quantItens){
+int getRelations(vector<int> &itens, matriz &relation, int row, int quantItens){
 
     int sum = 0;
     int size = itens.size();
-    for (int j = 0; j < size; j++)
-        sum += relation[itens[j]][last];
+
+    for (int i = 0; i < size; i++)
+        sum += relation[itens[i]][row];
 
 	return sum;
 }
 
 // this function gets a combination, calculate it's sum and if it's a valid
 // combination, call the function for it sons
-void getSum(int quantItens, matriz &relation, vector<int> &combination, int actual_sum, solution *sol, vector<int> &v, vector<int> &s, int capacity){
-    // for (int j =0, k=0; j < quantItens; j++)
-    //     if (k <combination.size() && combination[k] == j) {
-    //         cout << 1;
-    //         k++;
-    //     }
-    //     else
-    //         cout << 0;
-    // cout << endl << actual_sum << endl;
+void getSum(int quantItens, matriz &relation, vector<int> &combination,
+            int actual_sum, vector<int> &v, vector<int> &s,
+            int capacity){
 
-
+    // beging to the next item to the last item, inserts
+    // a new element on the solution, calculates the solution and if it
+    // remains a space, call the function to it sons
+    signal(SIGALRM, alarm_handler);
+    if (timeout) return;
     for(int i = combination.back()+1; i < quantItens; i++){
-        if (s[i] <= capacity) {
+
+        // gets the weight of the item
+        int item_s = s[i];
+
+        // checks if the object fit in the bag
+        if (item_s <= capacity) {
             combination.push_back(i);
             int sum = actual_sum + v[i];
             sum += getRelations(combination, relation, i, quantItens);
+
+            // if it's the best solution at time, updates sol
             if (sum > sol->value){
                 sol->value = sum;
                 sol->itens = combination;
             }
-            if(s[i] < capacity){
-                getSum(quantItens, relation, combination, sum, sol, v, s,    capacity-s[i]);
-            }
+
+            // if the element fits on the bag and left an empty space, call the
+            // function to place more itens
+            if(item_s < capacity)
+                getSum(quantItens, relation, combination, sum, v, s,
+                       capacity-item_s);
+
             combination.pop_back();
         }
     }
 }
 
-// generate all the combinations
-void getSolution(int quantItens, int capacity, vector<int> &s, vector<int> &v, matriz &relation, solution *sol){
+// generate the solutions parents (one single element on the bag) and calls
+// a recursive function to add more itens to the solution
+void getSolution(int quantItens, int capacity, vector<int> &s, vector<int> &v,
+                 matriz &relation){
 
-  for(int i = 0; i < quantItens; i++){
+    // for each single element...
+    for(int i = 0; i < quantItens; i++){
       vector<int> init;
       init.push_back(i);
+
+      // if the element is of the size of the bag, place it on the bag
+      // and check if it's a good solution
       if(s[i] <= capacity){
-          int sum = v[i];
-          if (sum > sol->value){
-              sol->value = sum;
+
+          int value = v[i];
+          if (value > sol->value){
+              sol->value = value;
               sol->itens = init;
           }
-          if(s[i] < capacity){
-              getSum(quantItens, relation, init, v[i], sol, v, s, capacity-s[i]);
-        }
+
+          // if the element fits on the bag and left an empty space, call the
+          // function to place more itens
+          if(s[i] < capacity)
+              getSum(quantItens, relation, init, v[i], v, s, capacity-s[i]);
       }
-  }
+
+    }
 
 }
 
-
-int algE(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &relation, vector<int>& itensMochila, int maxTime)
+int algE(int capacity, int quantItens, vector<int> s, vector<int> v,
+         matriz &relation, vector<int>& itensMochila, int maxTime)
 {
+    // initialize alarm
+    alarm(maxTime);
+
 	// initializing an empty solution
-	solution *sol;
 	sol = new solution;
 	sol->value = 0;
-	sol->itens.reserve(quantItens);
+    sol->itens.reserve(quantItens);
 
-    getSolution(quantItens, capacity, s, v, relation, sol);
+    // calculate the exact solution
+    getSolution(quantItens, capacity, s, v, relation);
 
-    // translate vector of index -> binary vector
+    // translate vector of indeces to a binary vector
     int size = sol->itens.size();
-    for(int i = 0; i < size; i++){
+    for(int i = 0; i < size; i++)
         itensMochila[sol->itens[i]] = 1;
-        cout << sol->itens[i] + 1 << " ";
-    }
-    cout << endl;
-
-    //cout << sumWeights(s, sol->itens) << endl;
 
     return sol->value;
 }
 
-int algH(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &relation, vector<int>& itensMochila, int maxTime)
+int algH(int capacity, int quantItens, vector<int> s, vector<int> v,
+         matriz &relation, vector<int>& itensMochila, int maxTime)
 {
 	return 0;
 }
