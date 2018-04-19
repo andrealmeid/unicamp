@@ -147,13 +147,19 @@ typedef struct _item {
     double relative_value;
 } item;
 
+
+bool compareItems(item* lhs, item* rhs)
+{
+  return lhs->relative_value > rhs->relative_value;
+}
+
 vector<int> orderedItens(matriz &relation, vector<int> v, vector<int> s, int quantItens){
     vector<int> order(quantItens);
 
     vector<item *> items(quantItens);
 
     item *o;
-    int sum;
+    double sum;
     for(int i = 0; i < quantItens; i++){
         o = new item;
         o->index = i;
@@ -164,6 +170,17 @@ vector<int> orderedItens(matriz &relation, vector<int> v, vector<int> s, int qua
         o->relative_value = sum/s[i];
         items[i] = o;
     }
+
+    sort(items.begin(), items.end(), compareItems);
+
+    // for(int i = 0; i < quantItens; i++)
+    //     cout << items[i]->relative_value << " ";
+    // cout << endl;
+    //
+    // for(int i = 0; i < quantItens; i++)
+    //     cout << items[i]->index << " ";
+    // cout << endl;
+
 
     for(int i = 0; i < quantItens; i++){
         order[i] = items[i]->index;
@@ -176,5 +193,18 @@ int algH(int capacity, int quantItens, vector<int> s, vector<int> v,
          matriz &relation, vector<int>& itensMochila, int maxTime)
 {
     vector<int> items = orderedItens(relation, v, s, quantItens);
-	return 0;
+
+    int weight = s[items[0]];
+    int sum = v[items[0]];
+
+    vector<int> solution;
+    solution.push_back(items[0]);
+
+    // hello, we gonna put items
+    while (weight < capacity) {
+
+    }
+
+
+	return sum;
 }
