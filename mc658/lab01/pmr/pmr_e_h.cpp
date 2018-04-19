@@ -23,45 +23,21 @@ typedef struct _solution{
     vector<int> itens;
 } solution;
 
-/*
-	s -> weight
-	v -> value
-*/
-
-// sum the relations on a subset of itens
-int getRelations(vector<int> itens, matriz &relation, int last, int quantItens){
+// sum the relations of the new item with the objects that already
+// are on the solution
+int getRelations(vector<int> &itens, matriz &relation, int last, int quantItens){
 
     int sum = 0;
-
-    for (int j = 0; j < itens.size(); j++)
+    int size = itens.size();
+    for (int j = 0; j < size; j++)
         sum += relation[itens[j]][last];
 
 	return sum;
 }
 
-// sum the value, weight and relations of an iten's subset
-int sumItens(int capacity, vector<int> s, vector<int> v, matriz &relation,
-			 vector<int> itens, int quantItens){
-	int value = 0;
-
-	for(int i = 0; i < itens.size(); i++){
-		value += v[itens[i]] + getRelations(itens, relation, i, quantItens);
-	}
-
-	return value;
-}
-
-int sumWeights(vector<int> s, vector<int> itens){
-    int weight = 0;
-
-	for(int i = 0; i < itens.size(); i++){
-        weight += s[itens[i]];
-    }
-    return weight;
-}
-
-
-void getSum(int quantItens, matriz &relation, vector<int> combination, int actual_sum, solution *sol, vector<int> v, vector<int> s, int capacity){
+// this function gets a combination, calculate it's sum and if it's a valid
+// combination, call the function for it sons
+void getSum(int quantItens, matriz &relation, vector<int> &combination, int actual_sum, solution *sol, vector<int> &v, vector<int> &s, int capacity){
     // for (int j =0, k=0; j < quantItens; j++)
     //     if (k <combination.size() && combination[k] == j) {
     //         cout << 1;
@@ -71,30 +47,40 @@ void getSum(int quantItens, matriz &relation, vector<int> combination, int actua
     //         cout << 0;
     // cout << endl << actual_sum << endl;
 
-    int sum = actual_sum;
-    sum += getRelations(combination, relation, combination.back(), quantItens);
-    if (sum > sol->value){
-        sol->value = sum;
-        sol->itens = combination;
-    }
 
     for(int i = combination.back()+1; i < quantItens; i++){
         if (s[i] <= capacity) {
             combination.push_back(i);
-            getSum(quantItens, relation, combination, sum + v[i], sol, v, s, capacity-s[i]);
+            int sum = actual_sum + v[i];
+            sum += getRelations(combination, relation, i, quantItens);
+            if (sum > sol->value){
+                sol->value = sum;
+                sol->itens = combination;
+            }
+            if(s[i] < capacity){
+                getSum(quantItens, relation, combination, sum, sol, v, s,    capacity-s[i]);
+            }
             combination.pop_back();
         }
     }
 }
 
 // generate all the combinations
-void getSolution(int quantItens, int capacity, vector<int> s, vector<int> v, matriz &relation, solution *sol){
+void getSolution(int quantItens, int capacity, vector<int> &s, vector<int> &v, matriz &relation, solution *sol){
 
   for(int i = 0; i < quantItens; i++){
       vector<int> init;
       init.push_back(i);
-      if(s[i] <= capacity)
-        getSum(quantItens, relation, init, v[i], sol, v, s, capacity-s[i]);
+      if(s[i] <= capacity){
+          int sum = v[i];
+          if (sum > sol->value){
+              sol->value = sum;
+              sol->itens = init;
+          }
+          if(s[i] < capacity){
+              getSum(quantItens, relation, init, v[i], sol, v, s, capacity-s[i]);
+        }
+      }
   }
 
 }
@@ -105,19 +91,20 @@ int algE(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &rel
 	// initializing an empty solution
 	solution *sol;
 	sol = new solution;
-
 	sol->value = 0;
 	sol->itens.reserve(quantItens);
 
     getSolution(quantItens, capacity, s, v, relation, sol);
 
-    for(int i = 0; i < sol->itens.size(); i++){
+    // translate vector of index -> binary vector
+    int size = sol->itens.size();
+    for(int i = 0; i < size; i++){
         itensMochila[sol->itens[i]] = 1;
         cout << sol->itens[i] + 1 << " ";
     }
     cout << endl;
 
-    cout << sumWeights(s, sol->itens) << endl;
+    //cout << sumWeights(s, sol->itens) << endl;
 
     return sol->value;
 }
