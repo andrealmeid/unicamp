@@ -29,12 +29,12 @@ typedef struct _solution{
 */
 
 // sum the relations on a subset of itens
-int getRelations(vector<int> itens, matriz &relation, int i, int quantItens){
+int getRelations(vector<int> itens, matriz &relation, int last, int quantItens){
 
     int sum = 0;
 
-    for (int j = i; j < itens[quantItens]; j++)
-        sum += relation[itens[i]][itens[j]];
+    for (int j = 0; j < itens.size(); j++)
+        sum += relation[itens[j]][last];
 
 	return sum;
 }
@@ -44,65 +44,61 @@ int sumItens(int capacity, vector<int> s, vector<int> v, matriz &relation,
 			 vector<int> itens, int quantItens){
 	int value = 0;
 
-	for(int i = 0; i < itens[quantItens]; i++){
+	for(int i = 0; i < itens.size(); i++){
 		value += v[itens[i]] + getRelations(itens, relation, i, quantItens);
 	}
 
 	return value;
 }
 
-bool sumWeights(vector<int> s, vector<int> itens, int capacity, int quantItens){
+int sumWeights(vector<int> s, vector<int> itens){
     int weight = 0;
 
-	for(int i = 0; i < itens[quantItens]; i++){
+	for(int i = 0; i < itens.size(); i++){
         weight += s[itens[i]];
     }
+    return weight;
+}
 
-    if (weight > capacity)
-        return false;
-    return true;
+
+void getSum(int quantItens, matriz &relation, vector<int> combination, int actual_sum, solution *sol, vector<int> v, vector<int> s, int capacity){
+    // for (int j =0, k=0; j < quantItens; j++)
+    //     if (k <combination.size() && combination[k] == j) {
+    //         cout << 1;
+    //         k++;
+    //     }
+    //     else
+    //         cout << 0;
+    // cout << endl << actual_sum << endl;
+
+    int sum = actual_sum;
+    sum += getRelations(combination, relation, combination.back(), quantItens);
+    if (sum > sol->value){
+        sol->value = sum;
+        sol->itens = combination;
+    }
+
+    for(int i = combination.back()+1; i < quantItens; i++){
+        if (s[i] <= capacity) {
+            combination.push_back(i);
+            getSum(quantItens, relation, combination, sum + v[i], sol, v, s, capacity-s[i]);
+            combination.pop_back();
+        }
+    }
 }
 
 // generate all the combinations
-std::vector<std::vector<int> > generateCombinations(int quantItens,
-int capacity, vector<int> s){
-  queue < vector<int> > fila;
-  std::vector<std::vector<int> > combinations;
+void getSolution(int quantItens, int capacity, vector<int> s, vector<int> v, matriz &relation, solution *sol){
 
   for(int i = 0; i < quantItens; i++){
-    vector<int> vv(quantItens+1);
-    vv[0] = i;
-    vv[quantItens] = 1;
-    fila.push(vv);
+      vector<int> init;
+      init.push_back(i);
+      if(s[i] <= capacity)
+        getSum(quantItens, relation, init, v[i], sol, v, s, capacity-s[i]);
   }
 
-  while (!fila.empty()) {
-    vector<int> k;
-    k = fila.front();
-
-    combinations.push_back(k);
-
-    for(int i = k[k[quantItens]-1]+1; i < quantItens; i++){
-
-      k[k[quantItens]] = i;
-      k[quantItens]++;
-
-      if(sumWeights(s, k, capacity, quantItens))
-        fila.push(k);
-
-      k[quantItens]--;
-    }
-
-    fila.pop();
-  }
-
-  return combinations;
 }
 
-// void prepareSolution(solution sol, vector<int> itens){
-//   for(int i = 0; i < itens.size(); i++)
-//     sol->itens[itens[i]] = 1;
-// }
 
 int algE(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &relation, vector<int>& itensMochila, int maxTime)
 {
@@ -113,24 +109,15 @@ int algE(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &rel
 	sol->value = 0;
 	sol->itens.reserve(quantItens);
 
-    std::vector<std::vector<int> > combinations = generateCombinations(quantItens, capacity, s);
+    getSolution(quantItens, capacity, s, v, relation, sol);
 
-    int soma = 0;
-    std::vector<int> aux;
-
-    for(int j = 0; j < combinations.size(); j++){
-        aux = combinations[j];
-
-        soma = sumItens(capacity, s, v, relation, aux, quantItens);
-
-        if (soma > sol->value){
-          sol->value = soma;
-          sol->itens = aux;
-        }
-    }
-
-    for(int i = 0; i < sol->itens[quantItens]; i++)
+    for(int i = 0; i < sol->itens.size(); i++){
         itensMochila[sol->itens[i]] = 1;
+        cout << sol->itens[i] + 1 << " ";
+    }
+    cout << endl;
+
+    cout << sumWeights(s, sol->itens) << endl;
 
     return sol->value;
 }
