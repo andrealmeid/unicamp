@@ -57,9 +57,10 @@ void getSum(int quantItens, matriz &relation, vector<int> &combination,
     // beging to the next item to the last item, inserts
     // a new element on the solution, calculates the solution and if it
     // remains a space, call the function to it sons
-    signal(SIGALRM, alarm_handler);
-    if (timeout) return;
+
+    // stop making computation when times up
     for(int i = combination.back()+1; i < quantItens; i++){
+        if (timeout) return;
 
         // gets the weight of the item
         int item_s = s[i];
@@ -121,7 +122,9 @@ int algE(int capacity, int quantItens, vector<int> s, vector<int> v,
          matriz &relation, vector<int>& itensMochila, int maxTime)
 {
     // initialize alarm
+    signal(SIGALRM, alarm_handler);
     alarm(maxTime);
+
 
 	// initializing an empty solution
 	sol = new solution;
@@ -139,8 +142,39 @@ int algE(int capacity, int quantItens, vector<int> s, vector<int> v,
     return sol->value;
 }
 
+typedef struct _item {
+    int index;
+    double relative_value;
+} item;
+
+vector<int> orderedItens(matriz &relation, vector<int> v, vector<int> s, int quantItens){
+    vector<int> order(quantItens);
+
+    vector<item *> items(quantItens);
+
+    item *o;
+    int sum;
+    for(int i = 0; i < quantItens; i++){
+        o = new item;
+        o->index = i;
+        sum = v[i];
+        for(int j = 0; j < quantItens; j++)
+            sum += relation[i][j];
+
+        o->relative_value = sum/s[i];
+        items[i] = o;
+    }
+
+    for(int i = 0; i < quantItens; i++){
+        order[i] = items[i]->index;
+    }
+
+    return order;
+}
+
 int algH(int capacity, int quantItens, vector<int> s, vector<int> v,
          matriz &relation, vector<int>& itensMochila, int maxTime)
 {
+    vector<int> items = orderedItens(relation, v, s, quantItens);
 	return 0;
 }
