@@ -201,10 +201,18 @@ int algH(int capacity, int quantItens, vector<int> s, vector<int> v,
     solution.push_back(items[0]);
 
     // hello, we gonna put items
-    while (weight < capacity) {
+	for (int i = 1; i < quantItens; i++) {
+		if(s[items[i]] <= capacity - weight){
+			solution.push_back(items[i]);
+			sum += v[items[i]];
+			sum += getRelations(solution, relation, items[i], quantItens);
+			weight += s[items[i]];
+		}
 
-    }
+	}
 
+	for(int i = 0; i < solution.size(); i++)
+        itensMochila[solution[i]] = 1;
 
 	return sum;
 }
