@@ -13,13 +13,10 @@
 
 #include <iostream>
 #include <float.h>
-#include <queue>
 #include <signal.h>
 #include <unistd.h>
 #include "pmr_e_h.h"
 //typedef vector<vector<double> > matriz;
-
-// TODO: write functions prototype
 
 // struct that holds a solution
 typedef struct _solution{
@@ -37,32 +34,121 @@ typedef struct _item {
 	double relative_value;
 } item;
 
+// item struct comparator
+bool compareItems(item* lhs, item* rhs);
+
+// calculates a relative value of each item and sorted they by this value
+vector<int> sortedItens(matriz &relation, vector<int> v, vector<int> s, int quantItens);
+
+
+/* sum the relations of the new item with the objects that already
+   are on the solution */
+int getRelations(vector<int> &itens, matriz &relation, int row, int quantItens);
+
+
+/* this function gets a combination, calculate it's sum and if it's a valid
+   combination, call the function for it sons */
+void getSum(int quantItens, matriz &relation, vector<int> &combination,
+            int actual_sum, vector<int> &v, vector<int> &s,
+            int capacity);
+
+
+/* generate the solutions parents (one single element on the bag) and calls
+   a recursive function to add more itens to the solution */
+void getSolution(int quantItens, int capacity, vector<int> &s, vector<int> &v,
+			                 matriz &relation);
+
+
 // alarm functions
 volatile sig_atomic_t timeout = 0;
+static void alarm_handler(int sig);
+
+
+int algE(int capacity, int quantItens, vector<int> s, vector<int> v,
+         matriz &relation, vector<int>& itensMochila, int maxTime)
+{
+    // initialize alarm
+    signal(SIGALRM, alarm_handler);
+    alarm(maxTime);
+
+
+	// initializing an empty solution
+	sol = new solution;
+	sol->value = 0;
+    sol->itens.reserve(quantItens);
+
+    // calculate the exact solution
+    getSolution(quantItens, capacity, s, v, relation);
+
+    // translate vector of indeces to a binary vector
+    int size = sol->itens.size();
+    for(int i = 0; i < size; i++)
+        itensMochila[sol->itens[i]] = 1;
+
+    return sol->value;
+}
+
+
+int algH(int capacity, int quantItens, vector<int> s, vector<int> v,
+         matriz &relation, vector<int>& itensMochila, int maxTime)
+{
+	signal(SIGALRM, alarm_handler);
+	alarm(maxTime);
+    vector<int> items = sortedItens(relation, v, s, quantItens);
+
+    int sum = 0;
+
+    vector<int> solution;
+    solution.push_back(items[0]);
+
+    // we gonna put how many items we can, according to the priority order
+	for (int i = 0; i < quantItens; i++) {
+		if (timeout) break;
+		int actual_item = items[i];
+
+		// if actual item doesnt fit, go to next item
+		if(s[actual_item] <= capacity){
+			solution.push_back(actual_item);
+			sum += v[actual_item];
+			sum += getRelations(solution, relation, actual_item, quantItens);
+			capacity -= s[actual_item];
+		}
+	}
+
+	// translate vector of indeces to a binary vector
+	int size = solution.size();
+	for(int i = 0; i < size; i++)
+        itensMochila[solution[i]] = 1;
+
+	return sum;
+}
+
 static void alarm_handler(int sig)
 {
     timeout = 1;
 }
 
-
-// item struct comparator
 bool compareItems(item* lhs, item* rhs)
 {
   return lhs->relative_value > rhs->relative_value;
 }
 
 
-vector<int> orderedItens(matriz &relation, vector<int> v, vector<int> s, int quantItens){
-    vector<int> order(quantItens);
+vector<int> sortedItens(matriz &relation, vector<int> v, vector<int> s, int quantItens){
 
+    vector<int> order(quantItens);
     vector<item *> items(quantItens);
 
     item *o;
     double sum;
+
+	/* for each item, sums all the relation values, the value and divide by
+	   the weight */
     for(int i = 0; i < quantItens; i++){
         o = new item;
         o->index = i;
         sum = v[i];
+
         for(int j = 0; j < quantItens; j++)
             sum += relation[i][j];
 
@@ -70,17 +156,16 @@ vector<int> orderedItens(matriz &relation, vector<int> v, vector<int> s, int qua
         items[i] = o;
     }
 
+	// sort items
     sort(items.begin(), items.end(), compareItems);
 
-    for(int i = 0; i < quantItens; i++){
+	// cast vector<item> to vector<int>
+    for(int i = 0; i < quantItens; i++)
         order[i] = items[i]->index;
-    }
 
     return order;
 }
 
-// sum the relations of the new item with the objects that already
-// are on the solution
 int getRelations(vector<int> &itens, matriz &relation, int row, int quantItens){
 
     int sum = 0;
@@ -92,18 +177,16 @@ int getRelations(vector<int> &itens, matriz &relation, int row, int quantItens){
 	return sum;
 }
 
-// this function gets a combination, calculate it's sum and if it's a valid
-// combination, call the function for it sons
 void getSum(int quantItens, matriz &relation, vector<int> &combination,
             int actual_sum, vector<int> &v, vector<int> &s,
             int capacity){
 
-    // beging to the next item to the last item, inserts
-    // a new element on the solution, calculates the solution and if it
-    // remains a space, call the function to it sons
+    /* beging to the next item to the last item, inserts
+       a new element on the solution, calculates the solution and if it
+      remains a space, call the function to it sons */
 
-    // stop making computation when times up
     for(int i = combination.back()+1; i < quantItens; i++){
+		// stop making computation when times up
         if (timeout) return;
 
         // gets the weight of the item
@@ -137,7 +220,7 @@ void getSum(int quantItens, matriz &relation, vector<int> &combination,
 void getSolution(int quantItens, int capacity, vector<int> &s, vector<int> &v,
                  matriz &relation){
 
-	vector<int> itens = orderedItens(relation, v, s, quantItens);
+	vector<int> itens = sortedItens(relation, v, s, quantItens);
 
     // for each single element...
     for(int i = 0; i < quantItens; i++){
@@ -163,63 +246,4 @@ void getSolution(int quantItens, int capacity, vector<int> &s, vector<int> &v,
 
     }
 
-}
-
-int algE(int capacity, int quantItens, vector<int> s, vector<int> v,
-         matriz &relation, vector<int>& itensMochila, int maxTime)
-{
-    // initialize alarm
-    signal(SIGALRM, alarm_handler);
-    alarm(maxTime);
-
-
-	// initializing an empty solution
-	sol = new solution;
-	sol->value = 0;
-    sol->itens.reserve(quantItens);
-
-    // calculate the exact solution
-    getSolution(quantItens, capacity, s, v, relation);
-
-    // translate vector of indeces to a binary vector
-    int size = sol->itens.size();
-    for(int i = 0; i < size; i++)
-        itensMochila[sol->itens[i]] = 1;
-
-    return sol->value;
-}
-
-
-
-int algH(int capacity, int quantItens, vector<int> s, vector<int> v,
-         matriz &relation, vector<int>& itensMochila, int maxTime)
-{
-	// TODO: turn on alarm
-	// TODO: use a heap of items instead of a vector
-    vector<int> items = orderedItens(relation, v, s, quantItens);
-
-    int weight = s[items[0]];
-    int sum = v[items[0]];
-
-    vector<int> solution;
-    solution.push_back(items[0]);
-
-    // hello, we gonna put items
-	for (int i = 1; i < quantItens; i++) {
-		int actual_item = items[i];
-		if(s[actual_item] <= capacity - weight){
-			solution.push_back(actual_item);
-			sum += v[actual_item];
-			sum += getRelations(solution, relation, actual_item, quantItens);
-			weight += s[actual_item];
-		}
-		// TODO: each time something isn't put on solution, recalculate
-		// relative value without it
-
-	}
-
-	for(int i = 0; i < solution.size(); i++)
-        itensMochila[solution[i]] = 1;
-
-	return sum;
 }
