@@ -19,6 +19,8 @@
 #include "pmr_e_h.h"
 //typedef vector<vector<double> > matriz;
 
+// TODO: write functions prototype
+
 // struct that holds a solution
 typedef struct _solution{
     int value;
@@ -28,11 +30,53 @@ typedef struct _solution{
 // global solution variable
 solution *sol;
 
+// struct to hold the original index of the item and the relative value
+// relative value = (sum of all the relations + individual value)/weight
+typedef struct _item {
+	int index;
+	double relative_value;
+} item;
+
 // alarm functions
 volatile sig_atomic_t timeout = 0;
 static void alarm_handler(int sig)
 {
     timeout = 1;
+}
+
+
+// item struct comparator
+bool compareItems(item* lhs, item* rhs)
+{
+  return lhs->relative_value > rhs->relative_value;
+}
+
+
+vector<int> orderedItens(matriz &relation, vector<int> v, vector<int> s, int quantItens){
+    vector<int> order(quantItens);
+
+    vector<item *> items(quantItens);
+
+    item *o;
+    double sum;
+    for(int i = 0; i < quantItens; i++){
+        o = new item;
+        o->index = i;
+        sum = v[i];
+        for(int j = 0; j < quantItens; j++)
+            sum += relation[i][j];
+
+        o->relative_value = sum/s[i];
+        items[i] = o;
+    }
+
+    sort(items.begin(), items.end(), compareItems);
+
+    for(int i = 0; i < quantItens; i++){
+        order[i] = items[i]->index;
+    }
+
+    return order;
 }
 
 // sum the relations of the new item with the objects that already
@@ -93,16 +137,19 @@ void getSum(int quantItens, matriz &relation, vector<int> &combination,
 void getSolution(int quantItens, int capacity, vector<int> &s, vector<int> &v,
                  matriz &relation){
 
+	vector<int> itens = orderedItens(relation, v, s, quantItens);
+
     // for each single element...
     for(int i = 0; i < quantItens; i++){
       vector<int> init;
-      init.push_back(i);
+	  int actual_item = itens[i];
+      init.push_back(actual_item);
 
       // if the element is of the size of the bag, place it on the bag
       // and check if it's a good solution
-      if(s[i] <= capacity){
+      if(s[actual_item] <= capacity){
 
-          int value = v[i];
+          int value = v[actual_item];
           if (value > sol->value){
               sol->value = value;
               sol->itens = init;
@@ -110,8 +157,8 @@ void getSolution(int quantItens, int capacity, vector<int> &s, vector<int> &v,
 
           // if the element fits on the bag and left an empty space, call the
           // function to place more itens
-          if(s[i] < capacity)
-              getSum(quantItens, relation, init, v[i], v, s, capacity-s[i]);
+          if(s[actual_item] < capacity)
+              getSum(quantItens, relation, init, v[actual_item], v, s, capacity-s[actual_item]);
       }
 
     }
@@ -142,56 +189,13 @@ int algE(int capacity, int quantItens, vector<int> s, vector<int> v,
     return sol->value;
 }
 
-typedef struct _item {
-    int index;
-    double relative_value;
-} item;
 
-
-bool compareItems(item* lhs, item* rhs)
-{
-  return lhs->relative_value > rhs->relative_value;
-}
-
-vector<int> orderedItens(matriz &relation, vector<int> v, vector<int> s, int quantItens){
-    vector<int> order(quantItens);
-
-    vector<item *> items(quantItens);
-
-    item *o;
-    double sum;
-    for(int i = 0; i < quantItens; i++){
-        o = new item;
-        o->index = i;
-        sum = v[i];
-        for(int j = 0; j < quantItens; j++)
-            sum += relation[i][j];
-
-        o->relative_value = sum/s[i];
-        items[i] = o;
-    }
-
-    sort(items.begin(), items.end(), compareItems);
-
-    // for(int i = 0; i < quantItens; i++)
-    //     cout << items[i]->relative_value << " ";
-    // cout << endl;
-    //
-    // for(int i = 0; i < quantItens; i++)
-    //     cout << items[i]->index << " ";
-    // cout << endl;
-
-
-    for(int i = 0; i < quantItens; i++){
-        order[i] = items[i]->index;
-    }
-
-    return order;
-}
 
 int algH(int capacity, int quantItens, vector<int> s, vector<int> v,
          matriz &relation, vector<int>& itensMochila, int maxTime)
 {
+	// TODO: turn on alarm
+	// TODO: use a heap of items instead of a vector
     vector<int> items = orderedItens(relation, v, s, quantItens);
 
     int weight = s[items[0]];
@@ -202,12 +206,15 @@ int algH(int capacity, int quantItens, vector<int> s, vector<int> v,
 
     // hello, we gonna put items
 	for (int i = 1; i < quantItens; i++) {
-		if(s[items[i]] <= capacity - weight){
-			solution.push_back(items[i]);
-			sum += v[items[i]];
-			sum += getRelations(solution, relation, items[i], quantItens);
-			weight += s[items[i]];
+		int actual_item = items[i];
+		if(s[actual_item] <= capacity - weight){
+			solution.push_back(actual_item);
+			sum += v[actual_item];
+			sum += getRelations(solution, relation, actual_item, quantItens);
+			weight += s[actual_item];
 		}
+		// TODO: each time something isn't put on solution, recalculate
+		// relative value without it
 
 	}
 
