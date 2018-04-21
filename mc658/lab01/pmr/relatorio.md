@@ -13,7 +13,7 @@ A entrada do problema é dada por:
 - A capacidade da mochila e
 - O tempo máximo disponível para o cálculo da solução
 
-Todos os resultados mostrandos foram executados em uma máquina com processador Intel i7 de 3ª geração.
+Todos os resultados mostrandos foram executados em uma máquina com processador Intel Core i7-3537U CPU @ 2.00GHz.
 
 ## Algoritmo exato
 
@@ -90,8 +90,10 @@ Para os casos de teste de 01 à 12, o algoritmo exato executou abaixo de um segu
 Para os casos grandes, o algoritmo não conseguia ser executado em tempo hábil. Foram testados vários tempos de corte para o algoritmo. Conforme aumenta o tamanho da entrada, a influência de cada segundo diminui para a aproximação do resultado exato, mostrando o caráter exponencial do algoritmo.
 
 <center> <img src="assets/plot3.png"> </center>
-<center><i> Grupos de caso teste x Tempo de execução </i></center>
+<center><i> Grupos de caso teste x Precisão </i></center>
+<br>
 
+Precisão é o valor obtido dividido pelo valor esperado, variando de 0 à 1.
 
 ## Algoritmo aproximado
 
@@ -103,7 +105,7 @@ Após a ordenação, ele insere o maior item não inserido que cabe na mochila a
 
 
 ### Implementação
-A implementação do algoritmo heurístico é dado por:
+A implementação do algoritmo heurístico é dada por:
 
 > _01._ Inicia o alarme com o tempo máximo e ordena decrescentemente o vetor `itens` com os `n` itens pelo seu _valor relativo¹_
   _02._ Inicializa `soma` como 0
@@ -117,3 +119,18 @@ A implementação do algoritmo heurístico é dado por:
   _11._ &nbsp; &nbsp; &nbsp; &nbsp; Adiciona `valorRelacoes(i, solucao)` em `soma`
   _12._ &nbsp; &nbsp; &nbsp; &nbsp; Subtrai `peso[i]` de `capacidade`
   _13._ Retorna `soma` e `solucao`
+
+
+### Resultados
+Todas as entradas tiveram tempo de execução muito similar, atingindo um pico em 0,003 segundos no maior caso de teste. A precisão das respostas mostrou evoluir de maneira proporcional ao tamanho da entrada. Todos os casos testes grandes obtiveram 99% de precisão, e alguns pequenos atingiram 100%. Devido a complexidade das relações no problema, é improvável que entradas muito grandes atinjam 100%.
+
+<center> <img src="assets/plot4.png"> </center>
+<center><i> Caso teste x Precisão </i></center>
+<br>
+
+<center> <img src="assets/plot5.png"> </center>
+<center><i> Casos teste x Tempo de execução </i></center>
+<br>
+
+## Conclusão
+Para entradas pequenas, vale a pena executar os algoritmos exatos, já que estes apresentam resultados 100% precisos em tempo suficientemente pequenos, enquanto o heurístico, apesar de apresentar tempo menor, não garante precisão de 100% em todos os casos. Para as entragas grandes a escolha é usar o algoritmo aproximado, já que em pouquissimo tempo consegue retornar resultados com 99% de precisão, enquanto o algoritmo exato, mesmo com $10^6$ mais tempo não conseguiu alcançar 50% de precisão para algumas entradas.
