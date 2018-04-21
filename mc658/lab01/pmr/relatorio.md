@@ -128,6 +128,8 @@ Todas as entradas tiveram tempo de execução muito similar, atingindo um pico e
 <center><i> Caso teste x Precisão </i></center>
 <br>
 
+Embora o tempo de execução seja relativamente curto em comparação ao algoritmo exato, é possível observar no gráfico abaixo um comportamento exponencial conforme a entrada cresce. Dada uma entrada suficientemente grande, o algoritmo aproximado também será muito ineficiente, sendo necessário um corte pelo tempo de execução.
+
 <center> <img src="assets/plot5.png"> </center>
 <center><i> Casos teste x Tempo de execução </i></center>
 <br>
