@@ -48,7 +48,7 @@ int getRelations(vector<int> &itens, matriz &relation, int row, int quantItens);
 
 /* this function gets a combination, calculate it's sum and if it's a valid
    combination, call the function for it sons */
-void getSum(int quantItens, matriz &relation, vector<int> &combination,
+void getSolutionSons(int quantItens, matriz &relation, vector<int> &combination,
             int actual_sum, vector<int> &v, vector<int> &s,
             int capacity);
 
@@ -99,7 +99,6 @@ int algH(int capacity, int quantItens, vector<int> s, vector<int> v,
     int sum = 0;
 
     vector<int> solution;
-    solution.push_back(items[0]);
 
     // we gonna put how many items we can, according to the priority order
 	for (int i = 0; i < quantItens; i++) {
@@ -177,7 +176,7 @@ int getRelations(vector<int> &itens, matriz &relation, int row, int quantItens){
 	return sum;
 }
 
-void getSum(int quantItens, matriz &relation, vector<int> &combination,
+void getSolutionSons(int quantItens, matriz &relation, vector<int> &combination,
             int actual_sum, vector<int> &v, vector<int> &s,
             int capacity){
 
@@ -207,7 +206,7 @@ void getSum(int quantItens, matriz &relation, vector<int> &combination,
             // if the element fits on the bag and left an empty space, call the
             // function to place more itens
             if(item_s < capacity)
-                getSum(quantItens, relation, combination, sum, v, s,
+                getSolutionSons(quantItens, relation, combination, sum, v, s,
                        capacity-item_s);
 
             combination.pop_back();
@@ -241,7 +240,7 @@ void getSolution(int quantItens, int capacity, vector<int> &s, vector<int> &v,
           // if the element fits on the bag and left an empty space, call the
           // function to place more itens
           if(s[actual_item] < capacity)
-              getSum(quantItens, relation, init, v[actual_item], v, s, capacity-s[actual_item]);
+              getSolutionSons(quantItens, relation, init, v[actual_item], v, s, capacity-s[actual_item]);
       }
 
     }
