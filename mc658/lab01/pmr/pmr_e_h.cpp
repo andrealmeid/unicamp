@@ -38,7 +38,8 @@ typedef struct _item {
 bool compareItems(item* lhs, item* rhs);
 
 // calculates a relative value of each item and sorted they by this value
-vector<int> sortedItens(matriz &relation, vector<int> v, vector<int> s, int quantItens);
+vector<int> sortedItens(matriz &relation, vector<int> v, vector<int> s,
+	                    int quantItens);
 
 
 /* sum the relations of the new item with the objects that already
@@ -49,14 +50,14 @@ int getRelations(vector<int> &itens, matriz &relation, int row, int quantItens);
 /* this function gets a combination, calculate it's sum and if it's a valid
    combination, call the function for it sons */
 void getSolutionSons(int quantItens, matriz &relation, vector<int> &combination,
-            int actual_sum, vector<int> &v, vector<int> &s,
-            int capacity);
+                     int actual_sum, vector<int> &v, vector<int> &s,
+                     int capacity);
 
 
 /* generate the solutions parents (one single element on the bag) and calls
    a recursive function to add more itens to the solution */
 void getSolution(int quantItens, int capacity, vector<int> &s, vector<int> &v,
-			                 matriz &relation);
+			     matriz &relation);
 
 
 // alarm functions
@@ -70,7 +71,6 @@ int algE(int capacity, int quantItens, vector<int> s, vector<int> v,
     // initialize alarm
     signal(SIGALRM, alarm_handler);
     alarm(maxTime);
-
 
 	// initializing an empty solution
 	sol = new solution;
@@ -129,7 +129,7 @@ static void alarm_handler(int sig)
 
 bool compareItems(item* lhs, item* rhs)
 {
-  return lhs->relative_value > rhs->relative_value;
+	return lhs->relative_value > rhs->relative_value;
 }
 
 
@@ -206,8 +206,8 @@ void getSolutionSons(int quantItens, matriz &relation, vector<int> &combination,
             // if the element fits on the bag and left an empty space, call the
             // function to place more itens
             if(item_s < capacity)
-                getSolutionSons(quantItens, relation, combination, sum, v, s,
-                       capacity-item_s);
+                getSolutionSons(quantItens, relation, combination, sum, v,
+					            s, capacity-item_s);
 
             combination.pop_back();
         }
@@ -216,33 +216,33 @@ void getSolutionSons(int quantItens, matriz &relation, vector<int> &combination,
 
 // generate the solutions parents (one single element on the bag) and calls
 // a recursive function to add more itens to the solution
-void getSolution(int quantItens, int capacity, vector<int> &s, vector<int> &v,
-                 matriz &relation){
+void getSolution(int quantItens, int capacity, vector<int> &s, vector<int> &v, matriz &relation){
 
 	vector<int> itens = sortedItens(relation, v, s, quantItens);
 
-    // for each single element...
-    for(int i = 0; i < quantItens; i++){
-      vector<int> init;
-	  int actual_item = itens[i];
-      init.push_back(actual_item);
+	// for each single element...
+	for(int i = 0; i < quantItens; i++){
+		vector<int> init;
+		int actual_item = itens[i];
+		init.push_back(actual_item);
 
-      // if the element is of the size of the bag, place it on the bag
-      // and check if it's a good solution
-      if(s[actual_item] <= capacity){
+		// if the element is of the size of the bag, place it on the bag
+		// and check if it's a good solution
+		if(s[actual_item] <= capacity){
 
-          int value = v[actual_item];
-          if (value > sol->value){
-              sol->value = value;
-              sol->itens = init;
-          }
+			int value = v[actual_item];
+			if (value > sol->value){
+				sol->value = value;
+				sol->itens = init;
+			}
 
-          // if the element fits on the bag and left an empty space, call the
-          // function to place more itens
-          if(s[actual_item] < capacity)
-              getSolutionSons(quantItens, relation, init, v[actual_item], v, s, capacity-s[actual_item]);
-      }
+			// if the element fits on the bag and left an empty space, call the
+			// function to place more itens
+			if(s[actual_item] < capacity)
+				getSolutionSons(quantItens, relation, init, v[actual_item],
+					            v, s, capacity-s[actual_item]);
+		}
 
-    }
+	}
 
 }
