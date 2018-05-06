@@ -84,9 +84,15 @@ int algExato(int capacity, int quantItens, vector<int> s, vector<int> v, matriz 
 {
 	// creating gurobi environment variables
 	vector<GRBVar> x(quantItens);
+    vector<vector<GRBVar>> y(quantItens);
+
+    for(int i = 0; i < quantItens; i++)
+        y[i].reserve(quantItens);
+
 	GRBEnv env = GRBEnv();
 	GRBModel model = GRBModel(env);
-	GRBLinExpr sum_size;
+	GRBLinExpr sum_size = 0;
+    int sum_relations = 0;
 	model.set(GRB_StringAttr_ModelName, "PMR");
 	model.set(GRB_IntAttr_ModelSense, GRB_MAXIMIZE);
 
@@ -97,7 +103,15 @@ int algExato(int capacity, int quantItens, vector<int> s, vector<int> v, matriz 
 		sum_size += x[i] * s[i];
 	}
 
-	//model.setObjective(x[i] * v[i], GRB_MAXIMIZE);
+    // set binary x_i variable to decide if an item is or isn't on the bag
+	// defines the sum of all sizes
+	for(int i=0; i < quantItens; i++){
+        for(int j=0; j < quantItens; j++){
+            y[i][j] = model.addVar(0.0, 1.0, relation[i][j], GRB_BINARY, "yij");
+            model.addConstr(2 * y[i][j] <= x[i] + x[j]);
+            model.addConstr(1 + y[i][j] >= x[i] + x[j]);
+        }
+	}
 
 	model.update();
 	model.addConstr(sum_size <= capacity);
@@ -109,13 +123,27 @@ int algExato(int capacity, int quantItens, vector<int> s, vector<int> v, matriz 
 
 	for (int i=0; i<quantItens; i++) {
         if (x[i].get(GRB_DoubleAttr_X) > 0.999) {
+            cout << i << " ";
 			itensMochila[i] = 1;
-			total_value += sumItems(itensMochila, relation, i, quantItens);
+			//total_value += sumItems(itensMochila, relation, i, quantItens);
 			total_value += v[i];
         }
     }
+    cout << endl;
 
-	return total_value;
+    for (int i=0; i < quantItens; i++){
+        for (int j=0; j < quantItens; j++){
+            cout << y[i][j].get(GRB_DoubleAttr_X) << " ";
+            if (y[i][j].get(GRB_DoubleAttr_X) >= 0.999){
+                if (j > i)
+                    sum_relations += relation[i][j];
+            }
+        }
+        cout << '\n';
+    }
+    cout << sum_relations << endl;
+
+	return total_value + sum_relations;
 }
 
 
