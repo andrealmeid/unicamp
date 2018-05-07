@@ -83,9 +83,12 @@ int algExato(int capacity, int quantItens, vector<int> s, vector<int> v, matriz 
  ******************************************************************************/
 {
 	// creating gurobi environment variables
-	vector<GRBVar> x(quantItens);
+
+    // xi = item i is or isn't on the bag
+    vector<GRBVar> x(quantItens);
     vector<vector<GRBVar>> y(quantItens);
 
+    // yij = relation between i and j must be applied
     for(int i = 0; i < quantItens; i++)
         y[i].reserve(quantItens);
 
@@ -102,9 +105,9 @@ int algExato(int capacity, int quantItens, vector<int> s, vector<int> v, matriz 
 		x[i] = model.addVar(0.0, 1.0, v[i], GRB_BINARY, "xi");
 		sum_size += x[i] * s[i];
 	}
+    model.update();
 
-    // set binary x_i variable to decide if an item is or isn't on the bag
-	// defines the sum of all sizes
+    // set binary y_ij variable to decide if the relation must be applied
 	for(int i=0; i < quantItens; i++){
         for(int j=0; j < quantItens; j++){
             y[i][j] = model.addVar(0.0, 1.0, relation[i][j], GRB_BINARY, "yij");
@@ -117,31 +120,39 @@ int algExato(int capacity, int quantItens, vector<int> s, vector<int> v, matriz 
 	model.addConstr(sum_size <= capacity);
 	model.update();
 
+    //TODO: use heuristica
+//int algH(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &relation, vector<int>& itensMochila, int maxTime)
+
+    algH(capacity, quantItens, s, v, relation, itensMochila, maxTime);
+
+    for (int i = 0; i < quantItens; i++)
+        x[i].set(GRB_DoubleAttr_Start, itensMochila[i]);
+
+    for (int i=0; i < quantItens; i++)
+        for (int j=0; j < quantItens; j++)
+            y[i][j].set(GRB_DoubleAttr_Start, itensMochila[i]*itensMochila[j]);
+
+    for (int i = 0; i < quantItens; i++)
+        itensMochila[i] = 0;
+
+    //TODO set max time
     model.optimize();
 	double total_value = 0.0;
     double total_size = 0.0;
 
+    // sum the value of the items on the bag
 	for (int i=0; i<quantItens; i++) {
         if (x[i].get(GRB_DoubleAttr_X) > 0.999) {
-            cout << i << " ";
 			itensMochila[i] = 1;
-			//total_value += sumItems(itensMochila, relation, i, quantItens);
 			total_value += v[i];
         }
     }
-    cout << endl;
 
-    for (int i=0; i < quantItens; i++){
-        for (int j=0; j < quantItens; j++){
-            cout << y[i][j].get(GRB_DoubleAttr_X) << " ";
-            if (y[i][j].get(GRB_DoubleAttr_X) >= 0.999){
-                if (j > i)
+    // sum the relations
+    for (int i=0; i < quantItens; i++)
+        for (int j=0; j < quantItens; j++)
+            if (y[i][j].get(GRB_DoubleAttr_X) >= 0.999 && j > i)
                     sum_relations += relation[i][j];
-            }
-        }
-        cout << '\n';
-    }
-    cout << sum_relations << endl;
 
 	return total_value + sum_relations;
 }
