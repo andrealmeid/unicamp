@@ -120,22 +120,28 @@ int algExato(int capacity, int quantItens, vector<int> s, vector<int> v, matriz 
 	model.addConstr(sum_size <= capacity);
 	model.update();
 
-    //TODO: use heuristica
-//int algH(int capacity, int quantItens, vector<int> s, vector<int> v, matriz &relation, vector<int>& itensMochila, int maxTime)
+    double value = algH(capacity, quantItens, s, v, relation, itensMochila, maxTime);
 
-    algH(capacity, quantItens, s, v, relation, itensMochila, maxTime);
+    model.getEnv().set(GRB_DoubleParam_Cutoff, value);
+	model.update();
 
     for (int i = 0; i < quantItens; i++)
         x[i].set(GRB_DoubleAttr_Start, itensMochila[i]);
+	model.update();
 
     for (int i=0; i < quantItens; i++)
         for (int j=0; j < quantItens; j++)
             y[i][j].set(GRB_DoubleAttr_Start, itensMochila[i]*itensMochila[j]);
+	model.update();
 
     for (int i = 0; i < quantItens; i++)
         itensMochila[i] = 0;
 
-    //TODO set max time
+    // bound the execution time
+    if (maxTime > 0)
+        model.getEnv().set(GRB_DoubleParam_TimeLimit, maxTime);
+
+
     model.optimize();
 	double total_value = 0.0;
     double total_size = 0.0;
@@ -146,7 +152,7 @@ int algExato(int capacity, int quantItens, vector<int> s, vector<int> v, matriz 
 			itensMochila[i] = 1;
 			total_value += v[i];
         }
-    }
+    }time_limit
 
     // sum the relations
     for (int i=0; i < quantItens; i++)
