@@ -97,6 +97,7 @@ int algExato(int capacity, int quantItens, vector<int> s, vector<int> v, matriz 
 	GRBLinExpr sum_size = 0;
     int sum_relations = 0;
 	model.set(GRB_StringAttr_ModelName, "PMR");
+    model.set(GRB_IntParam_Presolve, 0);
 	model.set(GRB_IntAttr_ModelSense, GRB_MAXIMIZE);
 
 	// set binary x_i variable to decide if an item is or isn't on the bag
@@ -105,34 +106,21 @@ int algExato(int capacity, int quantItens, vector<int> s, vector<int> v, matriz 
 		x[i] = model.addVar(0.0, 1.0, v[i], GRB_BINARY, "xi");
 		sum_size += x[i] * s[i];
 	}
-    model.update();
 
     // set binary y_ij variable to decide if the relation must be applied
 	for(int i=0; i < quantItens; i++){
-        for(int j=0; j < quantItens; j++){
+        for(int j=i+1; j < quantItens; j++){
             y[i][j] = model.addVar(0.0, 1.0, relation[i][j], GRB_BINARY, "yij");
             model.addConstr(2 * y[i][j] <= x[i] + x[j]);
             model.addConstr(1 + y[i][j] >= x[i] + x[j]);
         }
 	}
 
-	model.update();
 	model.addConstr(sum_size <= capacity);
-	model.update();
 
     double value = algH(capacity, quantItens, s, v, relation, itensMochila, maxTime);
 
     model.getEnv().set(GRB_DoubleParam_Cutoff, value);
-	model.update();
-
-    for (int i = 0; i < quantItens; i++)
-        x[i].set(GRB_DoubleAttr_Start, itensMochila[i]);
-	model.update();
-
-    for (int i=0; i < quantItens; i++)
-        for (int j=0; j < quantItens; j++)
-            y[i][j].set(GRB_DoubleAttr_Start, itensMochila[i]*itensMochila[j]);
-	model.update();
 
     for (int i = 0; i < quantItens; i++)
         itensMochila[i] = 0;
@@ -141,7 +129,7 @@ int algExato(int capacity, int quantItens, vector<int> s, vector<int> v, matriz 
     if (maxTime > 0)
         model.getEnv().set(GRB_DoubleParam_TimeLimit, maxTime);
 
-
+    model.update();
     model.optimize();
 	double total_value = 0.0;
     double total_size = 0.0;
@@ -152,12 +140,12 @@ int algExato(int capacity, int quantItens, vector<int> s, vector<int> v, matriz 
 			itensMochila[i] = 1;
 			total_value += v[i];
         }
-    }time_limit
+    }
 
     // sum the relations
     for (int i=0; i < quantItens; i++)
-        for (int j=0; j < quantItens; j++)
-            if (y[i][j].get(GRB_DoubleAttr_X) >= 0.999 && j > i)
+        for (int j=i+1; j < quantItens; j++)
+            if (y[i][j].get(GRB_DoubleAttr_X) >= 0.999)
                     sum_relations += relation[i][j];
 
 	return total_value + sum_relations;

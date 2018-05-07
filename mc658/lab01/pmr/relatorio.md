@@ -4,7 +4,10 @@
 <br>MC658 - Lab 02</h2>
 </center>
 
-## O problema
+## I. O problema
+
+São dados $n$ itens, $N = {1, ..., n}$, e uma mochila de capacidade $C$. Cada item $i \in N$ tem um peso $s_i > 0$ e valor $v_i$ e cada par de itens $i, j \in N$ tem uma relação $r_{ij}$ (não necessariamente positiva). O objetivo é encontrar um subconjunto $S \subseteq N$ tal que $\sum\limits_{i \in S} {s_i \leqslant C}$ e $\sum \limits_{i \in S}{v_i}+{\sum\limits_{i \in S} \sum \limits_{j\in S, j>i} r_{ij} }$ é máximo.
+
 A entrada do problema é dada por:
 - Número de itens;
 - Matriz de relações de itens;
@@ -13,13 +16,13 @@ A entrada do problema é dada por:
 - A capacidade da mochila e
 - O tempo máximo disponível para o cálculo da solução
 
-Todos os resultados mostrandos foram executados em uma máquina com processador Intel Core i7-3537U CPU @ 2.00GHz.
+Todos os resultados mostrandos foram executados em uma máquina com processador Intel Core i7-3537U CPU @ 2.00GHz, rodando com GNU/Linux 4.15. O compilador usado foi o GCC 7.3.0, usando as _flags_ de compilação do Makefile disponibilizado.
 
-## Algoritmo exato
+## II. Algoritmo exato
 
 A abordagem exata para o problema foi criar uma estrutura de solução global, com a soma dos itens e um vetor de índices de itens da solução. Esta estrutura é atualizada sempre que é encontrada uma solução melhor.
 
-O algoritmo cria uma árvore de combinações de índices para cada item da entrada. As combinações geradas por cada nó inserem somente índices que sejam maiores que o último índice do nó pai, de forma a evitar permutações. Por exemplo, seja $n$ o número de itens e dado um nó com índices, $ i_1, i_2, i_3, ...,i_j$ , onde $i_k < i_{k+1}$, esse nó gerará $n-j$ folhas. Para cada $m \in [j+1, n]$, o nó ira uma folha inserindo em cada folha os índices do nó pai ($ i_1, i_2, i_3, ...,i_j$) mais o índice $m$.
+O algoritmo cria uma árvore de combinações de índices para cada item da entrada. As combinações geradas por cada nó inserem somente índices que sejam maiores que o último índice do nó pai, de forma a evitar permutações. Por exemplo, seja $n$ o número de itens e dado um nó com índices, $ i_1, i_2, i_3, ...,i_j$ , onde $i_k < i_{k+1}$, esse nó gerará $n-i_j$ folhas. Para cada $m \in [i_j+1, n]$, o nó ira uma folha inserindo em cada folha os índices do nó pai ($ i_1, i_2, i_3, ...,i_j$) mais o índice $m$.
 
 Se os itens de um nó não cabem na mochila, esse nó vira uma folha e não gera mais combinações. Por exemplo, se um conjunto de itens $(i_1, i_3, i_7)$ já ocupa a capacidade máxima da mochila, nenhum item $i_k$ (já que o peso de $i_k$ é maior que 0) será capaz de ocupar a mochila e não faz sentido calcularmos soluções com o conjunto inicial.
 
@@ -38,8 +41,7 @@ Por exemplo, para uma entrada com 4 itens, o algoritmo irá gerar a seguinte ár
 
 ![tree](/assets/tree.png)
 
-
-### Implementação
+### a. Implementação
 A implementação do algoritmo é feita da seguinte maneira, começando pela rotina principal:
 > _1._ Iniciar o alarme com o tempo máximo e ordenar decrescentemente os `n` itens pelo seu _valor relativo¹_.
   _2._ Criar uma estrutura global `solução`, com a soma igual à 0 e o conjunto de itens vazio
@@ -74,28 +76,28 @@ Rotina `calculaFilhos(itens[], soma_parcial, capacidade_parcial)`:
 
 O cálculo na linha _5_ de `valorRelacoes()` é feito tomando cuidado para não somar duas vezes a mesma relação. Somamos apenas as relações na coluna da matriz do item novo, pegando os itens que já estão na mocilha. Como a coluna do item novo nunca foi percorrida antes, os itens que iremos somar não serão repetidos.
 
-### Resultados
+### b. Resultados
 
 #### Casos pequenos
 Para os casos de teste de 01 à 12, o algoritmo exato executou abaixo de um segundo e obteve a resposta esperada. O tempo de execução do algoritmo crescia exponencialmente conforme o número de itens da entrada, como é possível ver nos gráficos abaixo:
 
 <center> <img src="assets/plot1.png"> </center>
-<center><i> Número de itens x Tempo de execução </i></center>
+<center><i> Tempo de execução (seg) x Número de itens </i></center>
 
 <br>
 <center> <img src="assets/plot2.png"> </center>
-<center><i> Caso teste x Tempo de execução </i></center>
+<center><i> Tempo de execução (seg) x Caso teste </i></center>
 
 #### Casos grandes
 Para os casos grandes, o algoritmo não conseguia ser executado em tempo hábil. Foram testados vários tempos de corte para o algoritmo. Conforme aumenta o tamanho da entrada, a influência de cada segundo diminui para a aproximação do resultado exato, mostrando o caráter exponencial do algoritmo.
 
 <center> <img src="assets/plot3.png"> </center>
-<center><i> Grupos de caso teste x Precisão </i></center>
+<center><i> Precisão X Grupos de caso teste </i></center>
 <br>
 
-Precisão é o valor obtido dividido pelo valor esperado, variando de 0 à 1.
+Precisão é o valor obtido dividido pelo valor esperado, variando de 0 à 1, equivalente à porcentagem. Os grupos de casos são, respectivamente, $1 \equiv 200, 2 \equiv 300, ..., 5 \equiv 600$.
 
-## Algoritmo aproximado
+## III. Algoritmo aproximado
 
 O algoritmo aproximado ordena decrescentemente os itens pelo valor relativo, definido na seção II.:
 
@@ -104,7 +106,7 @@ O algoritmo aproximado ordena decrescentemente os itens pelo valor relativo, def
 Após a ordenação, ele insere o maior item não inserido que cabe na mochila até que ela esteja cheia e toma estes itens como a solução. Essa heurística foi escolhida porque privilegia os itens com maior potencial para contribuirem com uma soma de valores próxima da ótima. A divisão pelo peso garante que o valor relativo cresça conforme o quanto da mochila que irá ocupar.
 
 
-### Implementação
+### a. Implementação
 A implementação do algoritmo heurístico é dada por:
 
 > _01._ Inicia o alarme com o tempo máximo e ordena decrescentemente o vetor `itens` com os `n` itens pelo seu _valor relativo¹_
@@ -121,18 +123,69 @@ A implementação do algoritmo heurístico é dada por:
   _13._ Retorna `soma` e `solucao`
 
 
-### Resultados
-Todas as entradas tiveram tempo de execução muito similar, atingindo um pico em 0,003 segundos no maior caso de teste. A precisão das respostas mostrou evoluir de maneira proporcional ao tamanho da entrada. Todos os casos testes grandes obtiveram 99% de precisão, e alguns pequenos atingiram 100%. Devido a complexidade das relações no problema, é improvável que entradas muito grandes atinjam 100%.
+### b. Resultados
+Todas as entradas tiveram tempo de execução muito similar, atingindo um pico em 0,003 segundos no maior caso de teste. A precisão das respostas mostrou evoluir de maneira quase proporcional ao tamanho da entrada. Todos os casos testes grandes obtiveram 99% de precisão, e alguns pequenos atingiram 100%. A precisão mínima obtida foi de 87%. Devido a complexidade das relações no problema, é improvável que entradas muito grandes atinjam 100%.
 
 <center> <img src="assets/plot4.png"> </center>
-<center><i> Caso teste x Precisão </i></center>
+<center><i> Precisão X Caso teste </i></center>
 <br>
 
-Embora o tempo de execução seja relativamente curto em comparação ao algoritmo exato, é possível observar no gráfico abaixo um comportamento exponencial conforme a entrada cresce. Dada uma entrada suficientemente grande, o algoritmo aproximado também será muito ineficiente, sendo necessário um corte pelo tempo de execução.
+Embora o tempo de execução seja relativamente curto em comparação ao algoritmo exato, é possível observar no gráfico abaixo um comportamento quadrático ($n^2$) conforme a entrada cresce. Dada uma entrada suficientemente grande, o algoritmo aproximado também será muito ineficiente, sendo necessário um corte pelo tempo de execução.
 
 <center> <img src="assets/plot5.png"> </center>
-<center><i> Casos teste x Tempo de execução </i></center>
+<center><i> Tempo de execução (seg) X Casos teste </i></center>
 <br>
 
-## Conclusão
+## IV. Conclusão
 Para entradas pequenas, vale a pena executar os algoritmos exatos, já que estes apresentam resultados 100% precisos em tempo suficientemente pequenos, enquanto o heurístico, apesar de apresentar tempo menor, não garante precisão de 100% em todos os casos. Para as entragas grandes a escolha é usar o algoritmo aproximado, já que em pouquissimo tempo consegue retornar resultados com 99% de precisão, enquanto o algoritmo exato, mesmo com $10^6$ mais tempo não conseguiu alcançar 50% de precisão para algumas entradas.
+
+
+### Resultados finais
+#### Exato
+
+<center><i> Resultados finais para o algoritmo exato. <br>
+Resultado contem porcentagem de precisão, se não for 100%. </i></center>
+
+| Entrada | Resultado | Tempo (seg) |
+| --      | --------  | ----- |
+| 1   | 193   | 0,000111    |
+| 2   | 330   | $4,4 * 10^-5$ |
+| 3   | 260   | 0,000104    |
+| 4   | 549   | $7,3  * 10^-5$|
+| 5   | 337   | $5,9 * 10^-5$ |
+| 6   | 893   | 0,000287    |
+| 7   | 787   | 0,000158    |
+| 8   | 2044  | 0,002405    |
+| 9   | 1875  | 0,000913    |
+| 10  | 1773  | 0,009742    |
+| 11  | 3398  | 0,016658    |
+| 12  | 7736  | 0,796084    |
+| 200 | 22929 | 120         |
+| 300 | 36264 (96%) | 300         |
+| 400 | 46420 (72%) | 300         |
+| 500 | 54768 (56%)  | 300         |
+| 600 | 66557 (52%)  | 300         |
+
+<br>
+#### Heurístico
+<center><i> Resultados finais para o algoritmo Heurístico. <br></center>
+
+| Entrada | Resultado (% Precisão) | Tempo (seg) |
+|-----|-----------------|-------------|
+| 1   | 169 (87,56%)    | $5,8 * 10^-5$ |
+| 2   | 330 (100,00%)   |$6,6 * 10^-5$ |
+| 3   | 260 (100,00%)   |$8,5 * 10^-5$ |
+| 4   | 549 (100,00%)   |$7,5 * 10^-5$ |
+| 5   | 337 (100,00%)   | $2  * 10^-5 $ |
+| 6   | 858 (96,08%)    | $25 * 10^-5 $ |
+| 7   | 764 (97,08%)    | $24 * 10^-5 $ |
+| 8   | 1861 (91,05%)   | $8 * 10^-5  $ |
+| 9   | 1829 (97,55%)   | $3,7 * 10^-5$ |
+| 10  | 1773 (100,00%)  | $4.5 * 10^-5$ |
+| 11  | 3098 (91,17%)   | $6.8 * 10^-5$ |
+| 12  | 7401 (95,67%)   | 0,000117    |
+| 200 | 22878 (99,78%)  | 0,000398    |
+| 300 | 37666 (99,88%)  | 0,001203    |
+| 400 | 63748 (99,59%)  | 0,002071    |
+| 500 | 95808 (99,60%)  | 0,002242    |
+| 600 | 126865 (99,46%) | 0,00289     |
