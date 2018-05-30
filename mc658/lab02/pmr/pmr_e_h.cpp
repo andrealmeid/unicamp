@@ -82,32 +82,40 @@ int algExato(int capacity, int quantItens, vector<int> s, vector<int> v, matriz 
  * ENTRETANTO, NÃO ALTERE A ASSINATURA DO MÉTODO.
  ******************************************************************************/
 {
-	// creating gurobi environment variables
 
-    // xi = item i is or isn't on the bag
+    // x_i = item i is or isn't on the bag
     vector<GRBVar> x(quantItens);
     vector<vector<GRBVar>> y(quantItens);
 
-    // yij = relation between i and j must be applied
+    // y_ij = relation between i and j must be applied
     for(int i = 0; i < quantItens; i++)
         y[i].reserve(quantItens);
 
+    // creating gurobi environment and model variables
 	GRBEnv env = GRBEnv();
 	GRBModel model = GRBModel(env);
-	GRBLinExpr sum_size = 0;
+
+    // sum of the size of all objects
+    GRBLinExpr sum_size = 0;
+
+    // sum of all relations applied
     int sum_relations = 0;
+
+    // set our model name, disable presolver, and set that this is a
+    // maximize problem
 	model.set(GRB_StringAttr_ModelName, "PMR");
     model.set(GRB_IntParam_Presolve, 0);
 	model.set(GRB_IntAttr_ModelSense, GRB_MAXIMIZE);
 
 	// set binary x_i variable to decide if an item is or isn't on the bag
-	// defines the sum of all sizes
+	// and defines the sum of all sizes
 	for(int i=0; i < quantItens; i++){
 		x[i] = model.addVar(0.0, 1.0, v[i], GRB_BINARY, "xi");
 		sum_size += x[i] * s[i];
 	}
 
     // set binary y_ij variable to decide if the relation must be applied
+    // and set the y_ij restrictions
 	for(int i=0; i < quantItens; i++){
         for(int j=i+1; j < quantItens; j++){
             y[i][j] = model.addVar(0.0, 1.0, relation[i][j], GRB_BINARY, "yij");
@@ -116,12 +124,16 @@ int algExato(int capacity, int quantItens, vector<int> s, vector<int> v, matriz 
         }
 	}
 
+    // the sum of objects must fit in the bag
 	model.addConstr(sum_size <= capacity);
 
-    double value = algH(capacity, quantItens, s, v, relation, itensMochila, maxTime);
+    // calls the heuristic and get it approximated value
+    double heuristic_value = algH(capacity, quantItens, s, v, relation, itensMochila, maxTime);
 
-    model.getEnv().set(GRB_DoubleParam_Cutoff, value);
+    // set the cut off value, the value returned by algH
+    model.getEnv().set(GRB_DoubleParam_Cutoff, heuristic_value);
 
+    // remove all items from the bag
     for (int i = 0; i < quantItens; i++)
         itensMochila[i] = 0;
 
@@ -129,26 +141,17 @@ int algExato(int capacity, int quantItens, vector<int> s, vector<int> v, matriz 
     if (maxTime > 0)
         model.getEnv().set(GRB_DoubleParam_TimeLimit, maxTime);
 
+    // update the model with the variables and optimize
     model.update();
     model.optimize();
-	double total_value = 0.0;
-    double total_size = 0.0;
 
-    // sum the value of the items on the bag
-	for (int i=0; i<quantItens; i++) {
-        if (x[i].get(GRB_DoubleAttr_X) > 0.999) {
+    // put the items that has x_i ~= 1 in the bag
+	for (int i=0; i<quantItens; i++)
+        if (x[i].get(GRB_DoubleAttr_X) > 0.999)
 			itensMochila[i] = 1;
-			total_value += v[i];
-        }
-    }
 
-    // sum the relations
-    for (int i=0; i < quantItens; i++)
-        for (int j=i+1; j < quantItens; j++)
-            if (y[i][j].get(GRB_DoubleAttr_X) >= 0.999)
-                    sum_relations += relation[i][j];
-
-	return total_value + sum_relations;
+    // return the objective value found by Gurobi
+	return model.getObjective().getValue();
 }
 
 

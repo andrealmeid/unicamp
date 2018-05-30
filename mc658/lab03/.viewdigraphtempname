@@ -1,0 +1,18 @@
+digraph g {
+	size = "10, 10";
+	node [
+shape = "circle",
+style = "filled",
+fontsize = 20,
+];
+	1 [color="blue", pos = "0.000000,10.000000!"];
+	2 [color="red", pos = "20.000000,20.000000!"];
+	3 [color="red", pos = "40.000000,10.000000!"];
+	4 [color="red", pos = "20.000000,0.000000!"];
+	1 -> 3 [color="black" ];
+	2 -> 1 [color="black" ];
+	3 -> 4 [color="black" ];
+	4 -> 2 [color="black" ];
+label="TSP-P. Instance: in/gr_teste. Tour with cost: 25";
+fontsize = 30;
+}
