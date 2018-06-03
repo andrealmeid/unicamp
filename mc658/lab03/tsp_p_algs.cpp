@@ -29,6 +29,55 @@ vector<int> getSolucaoVizinha(vector<int> v, int tour_size);
 void printVector(vector<int> v){
     for(int i = 0; i < (int)v.size(); i++)
         cout << v[i] << " ";
+    cout << endl;
+}
+
+// swaps path in the interval [j, k]
+vector<int> opt2Swap(vector<int> path, int j,  int k){
+    vector<int> r = path;
+
+    if ((j > k) || k >= path.size())
+        return path;
+
+    for(int i = 0; i < ceil((k-j)/2.0); i++){
+        int aux = r[j+i];
+        r[j+i] = r[k-i];
+        r[k-i] = aux;
+    }
+
+    return r;
+
+}
+
+vector<int> opt2(vector<int> &path, const Tsp_P_Instance &l){
+    vector<int> r = path;
+
+    int best_value = pathCost(l, path);
+    int tour_size = path.size();
+    bool improved = true;
+
+    while(improved){
+        improved = false;
+        for(unsigned i = 1; i < tour_size - 1; i++){
+            for(unsigned j = i + 1; j < tour_size; j++){
+                vector<int>aux = opt2Swap(r, i, j);
+                printVector(aux);
+                int local_cost = pathCost(l, aux);
+                cout << local_cost << endl;
+                if (local_cost < best_value){
+                    best_value = local_cost;
+                    r = aux;
+                    improved = true;
+                    i = j = tour_size;
+                }
+            }
+        }
+    }
+
+    //printVector(r);
+    //cout << best_value << endl;
+
+    return r;
 }
 
 //------------------------------------------------------------------------------
@@ -73,9 +122,6 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 /* Implemente esta função, entretanto, não altere sua assinatura */
 {
-    // Tsp_P_Solution best;
-    //
-
     // simulated annealing
     srand(time(NULL));
     int temperatura = 100;
@@ -145,6 +191,17 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
         lemon::ListDigraphBase::Node w = l.g.nodeFromId(best_path[i]);
         s.tour.push_back(w);
     }
+
+
+    cout << "\n\nTest 2OPT" << endl;
+
+    vector<int> c = {0, 1, 2, 3};
+
+    // printVector(c);
+    // opt2Swap(c, 4, 6);
+    // printVector(c);
+
+    opt2(c, l);
 
     return false;
 }
