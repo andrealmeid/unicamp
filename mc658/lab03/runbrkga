@@ -1,4 +1,4 @@
 #!/bin/bash
 #./tsp_p.e -b -i in/gr_kinder4_lpd   -o out/gr_kinder4_lpd.BRKGA.out
 #./tsp_p.e -b -i in/gr_ulysses23_lpd -o out/gr_ulysses23_lpd.BRKGA.out
-#./tsp_p.e -b -i in/gr_berlin51_lpd  -o out/gr_berlin51_lpd.BRKGA.out
+./tsp_p.e -b -i in/gr_teste -o out/gr_test.BRKGA.out
