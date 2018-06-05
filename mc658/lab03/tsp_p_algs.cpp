@@ -131,7 +131,13 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     int n = 10;
     int tour_size = l.n;
 
-    vector<int> v = {0, 1, 2, 3};
+    vector<int> v(tour_size);
+
+    for(int i = 0; i < tour_size; i++)
+        v[i] = i;
+
+    vector<int> c = v;
+
     printVector(v);
     int value = pathCost(l, v);
 
@@ -192,13 +198,13 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
     for(int i = 1; i < best_path.size(); i++){
         lemon::ListDigraphBase::Node w = l.g.nodeFromId(best_path[i]);
+        cout << best_path[i] << " ";
         s.tour.push_back(w);
     }
 
 
     cout << "\n\nTest 2OPT" << endl;
 
-    vector<int> c = {0, 1, 2, 3};
 
     // printVector(c);
     // opt2Swap(c, 4, 6);
