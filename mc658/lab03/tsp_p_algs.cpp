@@ -17,6 +17,9 @@
 #include "mygraphlib.h"
 #include "tsp_p_algs.h"
 #include <algorithm>
+#include "tsp_p_Decoder.h"
+#include "MTRand.h"
+#include "BRKGA.h"
 #include <stdlib.h>
 #include <time.h>
 

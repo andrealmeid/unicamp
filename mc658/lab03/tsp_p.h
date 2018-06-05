@@ -3,10 +3,10 @@
  * MC658 - Projeto e Análise de Algoritmos III - 1s2018
  * Prof: Flavio Keidi Miyazawa
  * PED: Francisco Jhonatas Melo da Silva
- * Usa ideias e código de Mauro Mulati e Flávio Keidi Miyazawa 
+ * Usa ideias e código de Mauro Mulati e Flávio Keidi Miyazawa
  ******************************************************************************/
 
-/* Atenção: Qualquer alteração neste arquivo não terá efeito no projeto a ser 
+/* Atenção: Qualquer alteração neste arquivo não terá efeito no projeto a ser
  * testado no Momento da avaliação. */
 
 #ifndef TSP_P__H
@@ -22,7 +22,7 @@ typedef enum ENUM_ALG
    CONSTR_HEUR,
    META_HEUR_VIZ,
    EXACT,
-   BRKGA,
+   META_BRKGA,
 } ALG;
 
 typedef enum ENUM_VERBOSITY
@@ -59,7 +59,7 @@ public:
                   DNodePosMap    &pposy,
                   DNode           pdepot,
                   DNodeValueMap  &pweight_node);
-   
+
    ListDigraph    &g;
    int             n,
                    m;
