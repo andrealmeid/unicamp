@@ -55,15 +55,15 @@ GUROBI_LIB = -L$(GUROBI_DIR)/lib/  -lgurobi_c++ -lgurobi$(FLAGVERSION)  $(CPPSTD
 #---------------------------------------------
 # define includes and libraries
 INC = $(GUROBI_INC)  $(LEMONINCDIR)
-LIB = $(CC_LIB) $(GUROBI_LIB)  $(LEMONLIBDIR) -lemon 
+LIB = $(CC_LIB) $(GUROBI_LIB)  $(LEMONLIBDIR) -lemon
 
 
 
 
 # g++ -m64 -g -o exe readgraph.cpp viewgraph.cpp adjacencymatrix.cpp ex_fractional_packing.o -I/Library/gurobi600/mac64/include/ -L/Library/gurobi600/mac64/lib/ -lgurobi_c++ -lgurobi60 -stdlib=libstdc++ -lpthread -lm
-# g++ -m64 -g -c adjacencymatrix.cpp -o adjacencymatrix.o -I/Library/gurobi600/mac64/include/  -stdlib=libstdc++ 
+# g++ -m64 -g -c adjacencymatrix.cpp -o adjacencymatrix.o -I/Library/gurobi600/mac64/include/  -stdlib=libstdc++
 
-MYLIBSOURCES = mygraphlib.cpp geompack.cpp myutils.cpp tsp_p_algs.cpp
+MYLIBSOURCES = mygraphlib.cpp geompack.cpp myutils.cpp tsp_p_algs.cpp tsp_p_Decoder.cpp
 MYOBJLIB = $(MYLIBSOURCES:.cpp=.o)
 
 EX =  tsp_p.cpp

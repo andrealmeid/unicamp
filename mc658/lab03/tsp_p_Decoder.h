@@ -26,12 +26,13 @@
 
 class tsp_p_Decoder {
 public:
-	tsp_p_Decoder();
+	tsp_p_Decoder(const Tsp_P_Instance& instance);
 	~tsp_p_Decoder();
 
 	double decode(const std::vector< double >& chromosome) const;
 
 private:
+	const Tsp_P_Instance& instance;
 };
 
 #endif
