@@ -16,6 +16,9 @@
 #include <lemon/list_graph.h>
 #include <algorithm>
 #include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+
 #include <time.h>
 
 #include "mygraphlib.h"
@@ -23,6 +26,16 @@
 #include "tsp_p_Decoder.h"
 #include "MTRand.h"
 #include "BRKGA.h"
+
+
+// alarm functions
+volatile sig_atomic_t timeout = 0;
+static void alarm_handler(int sig);
+
+static void alarm_handler(int sig)
+{
+ 	timeout = 1;
+}
 
 bool naive(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl);
 
@@ -36,65 +49,27 @@ void printVector(vector<int> v){
     cout << endl;
 }
 
-bool myfunction2 (pair<int, double> i, pair<int, double> j) {
-	return (i.second < j.second);
-}
+bool comparator (pair<int, double> i, pair<int, double> j);
 
 // swaps path in the interval [j, k]
-vector<int> opt2Swap(vector<int> path, int j,  int k){
-    vector<int> r = path;
+vector<int> opt2Swap(vector<int> path, int j,  int k);
 
-    if ((j > k) || k >= (int) path.size())
-        return path;
+vector<int> opt2(vector<int> path, const Tsp_P_Instance &l);
 
-    for(int i = 0; i < ceil((k-j)/2.0); i++){
-        int aux = r[j+i];
-        r[j+i] = r[k-i];
-        r[k-i] = aux;
-    }
-
-    return r;
-
-}
-
-vector<int> opt2(vector<int> path, const Tsp_P_Instance &l){
-    vector<int> r = path;
-
-    int best_value = pathCost(l, path);
-    int tour_size = path.size();
-    bool improved = true;
-
-    while(improved){
-        improved = false;
-        for(int i = 1; i < tour_size - 1; i++){
-            for(int j = i + 1; j < tour_size; j++){
-                vector<int>aux = opt2Swap(r, i, j);
-                //printVector(aux);
-                int local_cost = pathCost(l, aux);
-                // cout << local_cost << endl;
-                if (local_cost < best_value){
-                    best_value = local_cost;
-                    r = aux;
-                    improved = true;
-                    i = j = tour_size;
-                }
-            }
-        }
-    }
-
-    //printVector(r);
-    //cout << best_value << endl;
-
-    return r;
-}
+vector<int> getFirstSolution(int depot_id, int tour_size);
 
 //------------------------------------------------------------------------------
 bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 /* Implemente esta função, entretanto, não altere sua assinatura */
 {
+   	signal(SIGALRM, alarm_handler);
+	alarm(tl);
+
     DNode depot;
     s.tour.clear();
     s.cost = 0.0;
+
+    int tour_size = l.n;
 
     depot = l.depot; //tour begins at s
     s.tour.push_back(depot);
@@ -102,6 +77,10 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     double arc_value, sum_tour = 0;
     OutArcIt arc_min;
     int j, cost;
+
+    vector<int> v = getFirstSolution(l.g.id(depot), tour_size);
+
+    printVector(v);
 
     for(int i = 1; i < l.n; i++){
         arc_value = DBL_MAX;
@@ -111,7 +90,7 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
             for(j = 0; j < i && l.g.target(a) != s.tour[j]; j++);
             if(j < i) continue;
 
-            cost = l.weight[a] * l.weight_node[l.g.target(a)];
+            cost = (sum_tour + l.weight[a]) * l.weight_node[l.g.target(a)];
 
             if(cost <= arc_value){
                 arc_value = cost;
@@ -123,6 +102,7 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
         s.cost += l.weight_node[l.g.target(arc_min)] * sum_tour;
         s.tour.push_back(l.g.target(arc_min));
     }
+    cout << s.cost << endl;
 
     return false;
 }
@@ -137,6 +117,12 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     int tour_size = l.n;
 
     vector<int> v(tour_size);
+
+    cout << "depot " << l.g.id(l.depot) << endl;
+
+    for(int i = 0; i < tour_size; i++){
+        cout << l.g.id(l.g.nodeFromId(i)) << endl;
+    }
 
     for(int i = 0; i < tour_size; i++)
         v[i] = i;
@@ -315,7 +301,7 @@ bool brkga(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 		 tour[i] = make_pair(i+1, bestChromosome[i]);
 	 }
 
-	std::sort(tour.begin(), tour.end(), myfunction2);
+	std::sort(tour.begin(), tour.end(), comparator);
 
 	vector<int> path(bestChromosome.size()+1);
 
@@ -403,6 +389,10 @@ bool naive(const Tsp_P_Instance &instance, Tsp_P_Solution  &sol, int tl)
 }
 //------------------------------------------------------------------------------
 
+bool comparator (pair<int, double> i, pair<int, double> j) {
+	return (i.second < j.second);
+}
+
 double pathCost(const Tsp_P_Instance &l, vector<int> path){
 
     double calcCost = 0.0;
@@ -447,4 +437,66 @@ vector<int> getSolucaoVizinha(vector<int> v, int tour_size){
     r[j] = aux;
 
     return r;
+}
+
+vector<int> opt2Swap(vector<int> path, int j,  int k){
+    vector<int> r = path;
+
+    if ((j > k) || k >= (int) path.size())
+        return path;
+
+    for(int i = 0; i < ceil((k-j)/2.0); i++){
+        int aux = r[j+i];
+        r[j+i] = r[k-i];
+        r[k-i] = aux;
+    }
+
+    return r;
+
+}
+
+vector<int> opt2(vector<int> path, const Tsp_P_Instance &l){
+    vector<int> r = path;
+
+    int best_value = pathCost(l, path);
+    int tour_size = path.size();
+    bool improved = true;
+
+    while(improved){
+        improved = false;
+        for(int i = 1; i < tour_size - 1; i++){
+            for(int j = i + 1; j < tour_size; j++){
+                vector<int>aux = opt2Swap(r, i, j);
+                //printVector(aux);
+                int local_cost = pathCost(l, aux);
+                // cout << local_cost << endl;
+                if (local_cost < best_value){
+                    best_value = local_cost;
+                    r = aux;
+                    improved = true;
+                    i = j = tour_size;
+                }
+            }
+        }
+    }
+
+    //printVector(r);
+    //cout << best_value << endl;
+
+    return r;
+}
+
+vector<int> getFirstSolution(int depot_id, int tour_size){
+    vector<int> v(tour_size);
+
+    v[0] = depot_id;
+
+    int k = 0;
+    for(int i = 1; i < tour_size; i++){
+        if(k == depot_id)
+            k++;
+        v[i] = k++;
+    }
+
+    return v;
 }
