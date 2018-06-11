@@ -27,6 +27,7 @@
 #include "MTRand.h"
 #include "BRKGA.h"
 
+#define DEBUG 1
 
 // alarm functions
 volatile sig_atomic_t timeout = 0;
@@ -62,121 +63,125 @@ vector<int> getFirstSolution(int depot_id, int tour_size);
 bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 /* Implemente esta função, entretanto, não altere sua assinatura */
 {
+    // initiate alarm
    	signal(SIGALRM, alarm_handler);
 	alarm(tl);
 
-    DNode depot;
+    // Initialize solution
     s.tour.clear();
     s.cost = 0.0;
-
-    int tour_size = l.n;
-
+    DNode depot;
     depot = l.depot; //tour begins at s
     s.tour.push_back(depot);
 
-    double arc_value, sum_tour = 0;
+    // Gets input information
+    int depot_id = l.g.id(depot);
+    int tour_size = l.n;
+
     OutArcIt arc_min;
-    int j, cost;
 
-    vector<int> v = getFirstSolution(l.g.id(depot), tour_size);
-
-    //printVector(v);
-
-    vector<int> unusedVertices(tour_size-1);
-
-    int k = 0;
-    for(int i = 0; i < tour_size-1; i++){
-        if(k == l.g.id(depot))
-            k++;
-        unusedVertices[i] = k++;
+    // creates a vector with ids of the unused vertices on the path
+    vector<int> avalibleVertices(tour_size-1);
+    for(int i = 0, j = 0; i < tour_size-1; i++){
+        if(j == depot_id)
+            j++;
+        avalibleVertices[i] = j++;
     }
 
-    vector<int> path;
-    path.push_back(l.g.id(depot));
-
-    int sum = 0;
+    // auxiliar variables
     int lowest_cost = (int) DBL_MAX;
     int lowest_id = 0;
-    lemon::ListDigraphBase::Node n, m;
-
+    lemon::ListDigraphBase::Node source, target;
     int id_to_remove = 0;
-
     int sum_ta = 0;
 
-    while(!unusedVertices.empty()){
+
+    // gets the insertion with the lowest impact on cost
+    while(!avalibleVertices.empty()){
+        if (timeout) break;
         lowest_cost = (int) DBL_MAX;
+
+        #if DEBUG
         printVector(path);
-        printVector(unusedVertices);
+        printVector(avalibleVertices);
+        #endif
+
+        // get the last vertice on the path
         int source_id = path.back();
-        n = l.g.nodeFromId(source_id);
+        source = l.g.nodeFromId(source_id);
 
+        #if DEBUG
         cout << "id = " << source_id << endl;
+        #endif
 
-        for(int k = 0; k < unusedVertices.size(); k++){
-            if (unusedVertices[k] == source_id)
-                continue;
+        // checks all remain vertices on the graph
+        for(unsigned i = 0; i < avalibleVertices.size(); i++){
+            int target_id = avalibleVertices[i];
 
+            target = l.g.nodeFromId(target_id);
+            Arc a = findArc(l.g, source, target);
 
-            int target_id = unusedVertices[k];
-
-            m = l.g.nodeFromId(target_id);
-            Arc a = findArc(l.g, n, m);
             int arc_peso =  l.weight[a];
-            int node_peso = l.weight_node[m];
+            int node_peso = l.weight_node[target];
 
-            if(((sum + arc_peso) * node_peso) < lowest_cost){
-                lowest_cost = (sum + arc_peso) * node_peso;
+            if(((s.cost + arc_peso) * node_peso) < lowest_cost){
+                lowest_cost = (s.cost + arc_peso) * node_peso;
                 lowest_id = target_id;
-                id_to_remove = k;
+                id_to_remove = i;
             }
         }
 
-        cout << "viz escolhido = " << unusedVertices[id_to_remove] << " (k=" << id_to_remove << ")"<< endl;
+        target = l.g.nodeFromId(lowest_id);
+        Arc min_arc = findArc(l.g, source, target);
+        int min_arc_peso =  l.weight[min_arc];
+        int min_node_peso = l.weight_node[target];
+        sum_ta += min_arc_peso;
+        s.cost += min_node_peso * sum_ta;
 
-        m = l.g.nodeFromId(lowest_id);
-        Arc a = findArc(l.g, n, m);
-        int arc_peso =  l.weight[a];
-        int node_peso = l.weight_node[m];
-        cout << "arc_peso = " << arc_peso << " node_peso = " << node_peso << endl;
+        // add vertice on the path
+        s.tour.push_back(target);
 
-        sum_ta += arc_peso;
-        sum += node_peso * sum_ta;
+        #if DEBUG
+        cout << "viz escolhido = " << avalibleVertices[id_to_remove] << " (k=" << id_to_remove << ")"<< endl;
+        cout << "arc_peso = " << min_arc_peso << " node_peso = " << min_node_peso << endl;
+        cout << "new sum = " << s.cost << endl << endl;
+        #endif
 
-        cout << "new sum = " << sum << endl << endl;
-
-        for(int k = id_to_remove; k < unusedVertices.size(); k++){
-            unusedVertices[k] = unusedVertices[k+1];
+        // removes taken vertice from avalible vertices
+        for(unsigned i = id_to_remove; i < avalibleVertices.size(); i++){
+            avalibleVertices[i] = avalibleVertices[i+1];
         }
-
-        path.push_back(lowest_id);
-        unusedVertices.pop_back();
+        avalibleVertices.pop_back();
     }
 
-    cout << "sum = " << sum << endl;
-
-    for(int i = 1; i < l.n; i++){
-        arc_value = DBL_MAX;
-
-        for (OutArcIt a(l.g, s.tour.back()); a != INVALID; ++a){
-
-            for(j = 0; j < i && l.g.target(a) != s.tour[j]; j++);
-            if(j < i) continue;
-
-            cost = (sum_tour + l.weight[a]) * l.weight_node[l.g.target(a)];
-
-            if(cost <= arc_value){
-                arc_value = cost;
-                arc_min = a;
-            }
-        }
-
-        sum_tour += l.weight[arc_min];
-        s.cost += l.weight_node[l.g.target(arc_min)] * sum_tour;
-        s.tour.push_back(l.g.target(arc_min));
-    }
-    cout << s.cost << endl;
+    #if DEBUG
+    cout << "sum = " << s.cost << endl;
+    #endif
 
     return false;
+
+    // double arc_value, sum_tour = 0;
+    // int j, cost;
+    // for(int i = 1; i < l.n; i++){
+    //     arc_value = DBL_MAX;
+    //
+    //     for (OutArcIt a(l.g, s.tour.back()); a != INVALID; ++a){
+    //
+    //         for(j = 0; j < i && l.g.target(a) != s.tour[j]; j++);
+    //         if(j < i) continue;
+    //
+    //         cost = (sum_tour + l.weight[a]) * l.weight_node[l.g.target(a)];
+    //
+    //         if(cost <= arc_value){
+    //             arc_value = cost;
+    //             arc_min = a;
+    //         }
+    //     }
+    //
+    //     sum_tour += l.weight[arc_min];
+    //     s.cost += l.weight_node[l.g.target(arc_min)] * sum_tour;
+    //     s.tour.push_back(l.g.target(arc_min));
+    // }
 }
 //------------------------------------------------------------------------------
 bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
