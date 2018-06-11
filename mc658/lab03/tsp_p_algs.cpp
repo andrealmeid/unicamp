@@ -80,7 +80,79 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
     vector<int> v = getFirstSolution(l.g.id(depot), tour_size);
 
-    printVector(v);
+    //printVector(v);
+
+    vector<int> unusedVertices(tour_size-1);
+
+    int k = 0;
+    for(int i = 0; i < tour_size-1; i++){
+        if(k == l.g.id(depot))
+            k++;
+        unusedVertices[i] = k++;
+    }
+
+    vector<int> path;
+    path.push_back(l.g.id(depot));
+
+    int sum = 0;
+    int lowest_cost = (int) DBL_MAX;
+    int lowest_id = 0;
+    lemon::ListDigraphBase::Node n, m;
+
+    int id_to_remove = 0;
+
+    int sum_ta = 0;
+
+    while(!unusedVertices.empty()){
+        lowest_cost = (int) DBL_MAX;
+        printVector(path);
+        printVector(unusedVertices);
+        int source_id = path.back();
+        n = l.g.nodeFromId(source_id);
+
+        cout << "id = " << source_id << endl;
+
+        for(int k = 0; k < unusedVertices.size(); k++){
+            if (unusedVertices[k] == source_id)
+                continue;
+
+
+            int target_id = unusedVertices[k];
+
+            m = l.g.nodeFromId(target_id);
+            Arc a = findArc(l.g, n, m);
+            int arc_peso =  l.weight[a];
+            int node_peso = l.weight_node[m];
+
+            if(((sum + arc_peso) * node_peso) < lowest_cost){
+                lowest_cost = (sum + arc_peso) * node_peso;
+                lowest_id = target_id;
+                id_to_remove = k;
+            }
+        }
+
+        cout << "viz escolhido = " << unusedVertices[id_to_remove] << " (k=" << id_to_remove << ")"<< endl;
+
+        m = l.g.nodeFromId(lowest_id);
+        Arc a = findArc(l.g, n, m);
+        int arc_peso =  l.weight[a];
+        int node_peso = l.weight_node[m];
+        cout << "arc_peso = " << arc_peso << " node_peso = " << node_peso << endl;
+
+        sum_ta += arc_peso;
+        sum += node_peso * sum_ta;
+
+        cout << "new sum = " << sum << endl << endl;
+
+        for(int k = id_to_remove; k < unusedVertices.size(); k++){
+            unusedVertices[k] = unusedVertices[k+1];
+        }
+
+        path.push_back(lowest_id);
+        unusedVertices.pop_back();
+    }
+
+    cout << "sum = " << sum << endl;
 
     for(int i = 1; i < l.n; i++){
         arc_value = DBL_MAX;
@@ -153,16 +225,19 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
             cout << "dif: " << dif << endl;
 
+            // compara difenrenca
             if (dif < 0){
                 v = v_viz;
 
                 if (value_viz < best_value){
+                    // melhor que solucao global
                     best_value = value_viz;
                     best_path = v_viz;
                     i = n;
                 }
 
             } else {
+                // ve probabilidade de pegar essa solucao pior
                 float randomico = (rand() % 10) / 10.0;
                 float param = ((float)(-dif)*1.0)/((float)temperatura * 1.0);
                 float e = exp(param);
