@@ -21,7 +21,7 @@ double tsp_p_Decoder::decode(const std::vector< double >& chromosome) const {
 
 	vector<pair<int, double>> tour(chromosome.size());
 
-	int depot_id = instance.g.id(instance.depot);
+	unsigned depot_id = instance.g.id(instance.depot);
 
 	for(unsigned i = 0, j = 0; i < chromosome.size(); i++, j++) {
 		if(i == depot_id)

@@ -194,107 +194,142 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     #endif
     return false;
 }
+
 //------------------------------------------------------------------------------
+#define INITAL_TEMPERATURE 100
+#define MIN_TEMPERATURE 10
+#define INNER_LIMIT 100 // inner loop limit
+#define ALPHA_PARAM 0.85 // alpha parameter of geometric decay
+#define K_PARAM 2 // k parameter that multiplies temperature
+
 bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 /* Implemente esta função, entretanto, não altere sua assinatura */
 {
-    // initiate alarm
+    /*  simulated annealing implementation  */
+
+    // initizalize alarm
     signal(SIGALRM, alarm_handler);
     alarm(tl);
 
-    // simulated annealing
-    srand(time(NULL));
-    double temperatura = 100;
-    int n = 10;
-    int tour_size = l.n;
+    // initizalize simulated annealing variables
+    double temperature = INITAL_TEMPERATURE;
+    const long unsigned rngSeed = time(0);
+    MTRand rng(rngSeed);
 
+    // instance variables
+    int tour_size = l.n;
+    int depot_id = l.g.id(l.depot);
+
+    #if DEBUG
     cout << "depot " << l.g.id(l.depot) << endl;
 
     for(int i = 0; i < tour_size; i++){
         cout << l.g.id(l.g.nodeFromId(i)) << endl;
     }
+    #endif
 
-    vector<int> v(tour_size);
+    // a vector with the index of the current path
+    vector<int> current_path(tour_size);
+    current_path[0] = depot_id;
 
-    int depot_id = l.g.id(l.depot);
-
-    v[0] = depot_id;
-
-    // path inicial
+    // initial path (sorted indicies)
     for(int i = 1, j = 0; i < tour_size; i++){
         if(j == depot_id)
             j++;
-        v[i] = j++;
+        current_path[i] = j++;
     }
 
-    printVector(v);
+    int current_value = pathCost(l, current_path);
 
-    int value = pathCost(l, v);
+    // variables to store global best values
+    int best_value = current_value;
+    vector<int> best_path = current_path;
 
-    int best_value = value;
-    vector<int> best_path = v;
-
+    #if DEBUG
+    printVector(current_path);
     cout << "solucao inicial: ";
-    cout << " valor: " << value << endl;
+    cout << " valor: " << current_value << endl;
+    #endif
 
-    while(temperatura >= 10){
-        cout << "temperatura: " << temperatura << endl;
+    // while temperature hasnt achieved the minimal temperature
+    while(temperature > MIN_TEMPERATURE){
+        #if DEBUG
+        cout << "temperature: " << temperature << endl;
+        #endif
 
-        for(int i = 0; i < n; i++){
-            value = pathCost(l, v);
-            vector<int> v_viz = opt2(v, l);
-            int value_viz = pathCost(l, v_viz);
+        // while it hasnt achieved the inner_limit or hasnt a new best global
+        for(int i = 0; i < INNER_LIMIT; i++){
+            // time's up, return current best solution
+            if (timeout) {
+                temperature = MIN_TEMPERATURE;
+                break;
+            }
 
+            // neighbor solution = 2-OPT
+            vector<int> neighbor_path = opt2(current_path, l);
+            int neighbor_value = pathCost(l, neighbor_path);
 
-            double dif = value_viz - value;
+            double diff = neighbor_value - current_value;
 
+            #if DEBUG
             cout << "solucao vizinha: ";
-            printVector(v_viz);
-            cout << " valor: " << value_viz << endl;
+            printVector(neighbor_path);
+            cout << " valor: " << neighbor_value << endl;
+            cout << "dif: " << diff << endl;
+            #endif
 
-            cout << "dif: " << dif << endl;
+            // verifies the difference between results
+            if (diff <= 0){
+                // updates current solution
+                current_path = neighbor_path;
+                current_value = neighbor_value;
 
-            // compara difenrenca
-            if (dif < 0){
-                v = v_viz;
-
-                if (value_viz < best_value){
-                    // melhor que solucao global
-                    best_value = value_viz;
-                    best_path = v_viz;
-                    i = n;
+                // updates global solution
+                if (neighbor_value < best_value){
+                    best_value = neighbor_value;
+                    best_path = neighbor_path;
                     break;
                 }
 
             } else {
-                // ve probabilidade de pegar essa solucao pior
-                double randomico = (rand() % 10) / 10.0;
-                double param = -dif/temperatura;
+                // calculates random probability to use worse solution
+                double random_value = rng.rand();
+                double param = -diff/(temperature * K_PARAM);
                 double e = exp(param);
-                cout << "rand: " << randomico << " e: " << e << endl;
-                if (e > randomico){
-                    v = v_viz;
+
+                #if DEBUG
+                cout << "rand: " << random_value << " e: " << e << endl;
+                #endif
+
+                // gets the new value
+                if (e > random_value){
+                    current_path = neighbor_path;
+                    current_value = neighbor_value;
+
+                    #if DEBUG
                     cout << "trocou" << endl;
+                    #endif
                 }
+
             }
         }
-        temperatura = temperatura * 0.80;
+        // temperature's geometric decay
+        temperature = temperature * ALPHA_PARAM;
     }
 
     cout << "solucao final: ";
     printVector(best_path);
     cout << " valor: " << best_value << endl;
 
-    DNode depot;
-    s.tour.clear();
+    // set's current best global solution as solution
     s.cost = best_value;
 
-    depot = l.depot; //tour begins at s
-    s.tour.push_back(depot);
+    s.tour.clear();
+    s.tour.push_back(l.depot);
 
-    for(unsigned i = 1; i < best_path.size(); i++){
-        lemon::ListDigraphBase::Node w = l.g.nodeFromId(best_path[i]);
-        s.tour.push_back(w);
+    for(int i = 1; i < tour_size; i++){
+        lemon::ListDigraphBase::Node node = l.g.nodeFromId(best_path[i]);
+        s.tour.push_back(node);
     }
 
     return false;
@@ -564,21 +599,16 @@ vector<int> opt2(vector<int> path, const Tsp_P_Instance &l){
         for(int i = 1; i < tour_size - 1; i++){
             for(int j = i + 1; j < tour_size; j++){
                 vector<int>aux = opt2Swap(r, i, j);
-                //printVector(aux);
                 int local_cost = pathCost(l, aux);
-                // cout << local_cost << endl;
                 if (local_cost < best_value){
                     best_value = local_cost;
                     r = aux;
                     improved = true;
-                    i = j = tour_size;
+                    break;
                 }
             }
         }
     }
-
-    //printVector(r);
-    //cout << best_value << endl;
 
     return r;
 }
