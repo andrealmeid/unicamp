@@ -208,13 +208,13 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     int n = 10;
     int tour_size = l.n;
 
-    vector<int> v(tour_size);
-
     cout << "depot " << l.g.id(l.depot) << endl;
 
     for(int i = 0; i < tour_size; i++){
         cout << l.g.id(l.g.nodeFromId(i)) << endl;
     }
+
+    vector<int> v(tour_size);
 
     int depot_id = l.g.id(l.depot);
 
@@ -228,8 +228,6 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     }
 
     printVector(v);
-
-    vector<int> c = v;
 
     int value = pathCost(l, v);
 
