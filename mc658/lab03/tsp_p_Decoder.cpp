@@ -7,7 +7,7 @@
 
 #include "tsp_p_Decoder.h"
 
-bool comparator (pair<int, double> i, pair<int, double> j); 
+bool comparator (pair<int, double> i, pair<int, double> j);
 
 double pathCost(const Tsp_P_Instance &l, vector<int> path);
 
@@ -21,9 +21,13 @@ double tsp_p_Decoder::decode(const std::vector< double >& chromosome) const {
 
 	vector<pair<int, double>> tour(chromosome.size());
 
-	for(unsigned i = 0; i < chromosome.size(); i++) {
-		 tour[i] = make_pair(i+1, chromosome[i]);
-	 }
+	int depot_id = instance.g.id(instance.depot);
+
+	for(unsigned i = 0, j = 0; i < chromosome.size(); i++, j++) {
+		if(i == depot_id)
+			j++;
+		tour[i] = make_pair(j, chromosome[i]);
+	}
 
 	std::sort(tour.begin(), tour.end(), comparator);
 
