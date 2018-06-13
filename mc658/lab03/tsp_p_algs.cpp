@@ -27,7 +27,8 @@
 #include "MTRand.h"
 #include "BRKGA.h"
 
-#define DEBUG 1
+#define DEBUG 0
+#define OUTARCIT 0
 
 // alarm functions
 volatile sig_atomic_t timeout = 0;
@@ -38,7 +39,7 @@ bool naive(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl);
 
 double pathCost(const Tsp_P_Instance &l, vector<int> path);
 
-vector<int> getSolucaoVizinha(vector<int> v, int tour_size);
+vector<int> getRandomNeighbor(vector<int> v, int tour_size);
 
 void printVector(vector<int> v){
     for(int i = 0; i < (int)v.size(); i++)
@@ -69,100 +70,97 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     DNode depot;
     depot = l.depot; //tour begins at s
     s.tour.push_back(depot);
-
-    // // Gets input information
-    // int depot_id = l.g.id(depot);
-    // int tour_size = l.n;
-    //
     OutArcIt arc_min;
-    //
-    // // creates a vector with ids of the unused vertices on the path
-    // vector<int> avalibleVertices(tour_size-1);
-    // for(int i = 0, j = 0; i < tour_size-1; i++){
-    //     if(j == depot_id)
-    //         j++;
-    //     avalibleVertices[i] = j++;
-    // }
-    //
-    // // initialize vector with choosen ids
-    // vector<int> path;
-    // path.push_back(depot_id);
-    //
-    // // auxiliar variables
-    // int lowest_cost = (int) DBL_MAX;
-    // int lowest_id = 0;
-    // lemon::ListDigraphBase::Node source, target;
-    // int id_to_remove = 0;
-    // int sum_ta = 0;
-    //
-    //
-    // // gets the insertion with the lowest impact on cost
-    // while(!avalibleVertices.empty()){
-    //     if (timeout) break;
-    //     lowest_cost = (int) DBL_MAX;
-    //
-    //     #if DEBUG
-    //     printVector(path);
-    //     printVector(avalibleVertices);
-    //     #endif
-    //
-    //     // get the last vertice on the path
-    //     int source_id = path.back();
-    //     source = l.g.nodeFromId(source_id);
-    //
-    //     #if DEBUG
-    //     cout << "id = " << source_id << endl;
-    //     #endif
-    //
-    //     // checks all remain vertices on the graph
-    //     for(unsigned i = 0; i < avalibleVertices.size(); i++){
-    //         int target_id = avalibleVertices[i];
-    //
-    //         target = l.g.nodeFromId(target_id);
-    //         Arc a = findArc(l.g, source, target);
-    //
-    //         int arc_peso =  l.weight[a];
-    //         int node_peso = l.weight_node[target];
-    //
-    //         if(((s.cost + arc_peso) * node_peso) < lowest_cost){
-    //             lowest_cost = (s.cost + arc_peso) * node_peso;
-    //             lowest_id = target_id;
-    //             id_to_remove = i;
-    //         }
-    //     }
-    //
-    //     target = l.g.nodeFromId(lowest_id);
-    //     Arc min_arc = findArc(l.g, source, target);
-    //     int min_arc_peso =  l.weight[min_arc];
-    //     int min_node_peso = l.weight_node[target];
-    //     sum_ta += min_arc_peso;
-    //     s.cost += min_node_peso * sum_ta;
-    //
-    //     // add vertice on the path
-    //     path.push_back(lowest_id);
-    //     s.tour.push_back(target);
-    //
-    //     #if DEBUG
-    //     cout << "viz escolhido = " << avalibleVertices[id_to_remove] << " (k=" << id_to_remove << ")"<< endl;
-    //     cout << "arc_peso = " << min_arc_peso << " node_peso = " << min_node_peso << endl;
-    //     cout << "new sum = " << s.cost << endl << endl;
-    //     #endif
-    //
-    //     // removes taken vertice from avalible vertices
-    //     for(unsigned i = id_to_remove; i < avalibleVertices.size(); i++){
-    //         avalibleVertices[i] = avalibleVertices[i+1];
-    //     }
-    //     avalibleVertices.pop_back();
-    // }
-    //
-    // // add depot cost
-    // source = l.g.nodeFromId(path.back());
-    // Arc min_arc = findArc(l.g, source, l.depot);
-    // sum_ta += l.weight[min_arc];
-    // s.cost = sum_ta * l.weight_node[l.depot];
-    //
+
+    // Gets input information
+    int depot_id = l.g.id(depot);
+    int tour_size = l.n;
 
 
+    // creates a vector with ids of the unused vertices on the path
+    vector<int> avalibleVertices(tour_size-1);
+    for(int i = 0, j = 0; i < tour_size-1; i++){
+        if(j == depot_id)
+            j++;
+        avalibleVertices[i] = j++;
+    }
+
+    // initialize vector with choosen ids
+    vector<int> path;
+    path.push_back(depot_id);
+
+    DNode source, target;
+    #if !OUTARCIT
+    // auxiliar variables
+    int lowest_cost = (int) DBL_MAX;
+    int lowest_id = 0;
+    int id_to_remove = 0;
+    int sum_ta = 0;
+
+    // gets the insertion with the lowest impact on cost
+    while(!avalibleVertices.empty()){
+        if (timeout) break;
+        lowest_cost = (int) DBL_MAX;
+
+        #if DEBUG
+        printVector(path);
+        printVector(avalibleVertices);
+        #endif
+
+        // get the last vertice on the path
+        int source_id = path.back();
+        source = l.g.nodeFromId(source_id);
+
+        #if DEBUG
+        cout << "id = " << source_id << endl;
+        #endif
+
+        // checks all remain vertices on the graph
+        for(unsigned i = 0; i < avalibleVertices.size(); i++){
+            int target_id = avalibleVertices[i];
+
+            target = l.g.nodeFromId(target_id);
+            Arc a = findArc(l.g, source, target);
+
+            int arc_peso =  l.weight[a];
+            int node_peso = l.weight_node[target];
+
+            int cost = arc_peso * node_peso;
+
+            if(cost < lowest_cost){
+                lowest_cost = cost;
+                lowest_id = target_id;
+                id_to_remove = i;
+            }
+        }
+
+        target = l.g.nodeFromId(lowest_id);
+        Arc min_arc = findArc(l.g, source, target);
+        int min_arc_peso =  l.weight[min_arc];
+        int min_node_peso = l.weight_node[target];
+        sum_ta += min_arc_peso;
+        s.cost += min_node_peso * sum_ta;
+
+        // add vertice on the path
+        path.push_back(lowest_id);
+        s.tour.push_back(target);
+
+        #if DEBUG
+        cout << "viz escolhido = " << avalibleVertices[id_to_remove] << " (k=" << id_to_remove << ")"<< endl;
+        cout << "arc_peso = " << min_arc_peso << " node_peso = " << min_node_peso << endl;
+        cout << "new sum = " << s.cost << endl << endl;
+        #endif
+
+        // removes taken vertice from avalible vertices
+        for(unsigned i = id_to_remove; i < avalibleVertices.size(); i++){
+            avalibleVertices[i] = avalibleVertices[i+1];
+        }
+        avalibleVertices.pop_back();
+    }
+    #endif
+
+
+    #if OUTARCIT
     double arc_value, sum_tour = 0;
     int j, cost;
     for(int i = 1; i < l.n; i++){
@@ -185,6 +183,8 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
         s.cost += l.weight_node[l.g.target(arc_min)] * sum_tour;
         s.tour.push_back(l.g.target(arc_min));
     }
+    #endif
+
     #if DEBUG
     cout << "sum = " << s.cost << endl;
     #endif
@@ -357,6 +357,10 @@ bool brkga(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     by Rodrigo Franco Toso and Mauricio G.C. Resende
      */
 
+     // initizalize alarm
+     signal(SIGALRM, alarm_handler);
+     alarm(tl);
+
     // Initialize decoder
     tsp_p_Decoder decoder(l);
 
@@ -379,6 +383,8 @@ bool brkga(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
     // Run the evolution loop:
 	for(unsigned generation = 1; generation < MAX_GENS; generation++){
+        if (timeout) break; // time's up! return current solution
+
 		algorithm.evolve();	// evolve the population for one generation
 
 		// Bookeeping: has the best solution thus far improved?
@@ -411,14 +417,14 @@ bool brkga(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     // creates a tour: a pair(vertex index, chromosome value)
     vector<pair<int, double>> tour(tour_size);
 
-    // place the vertex ordered by index
+	// fill vector with vertexes ordered by index
     for(unsigned i = 0, j = 0; i < tour_size; i++, j++) {
 		if((int) i == depot_id)
 			j++;
 		tour[i] = make_pair(j, bestChromosome[i]);
 	}
 
-    // sort the tour by the chromosome
+    // sort the tour by chromosome
 	sort(tour.begin(), tour.end(), comparator);
 
     // tour begins at depot
@@ -496,9 +502,9 @@ bool comparator (pair<int, double> i, pair<int, double> j) {
 double pathCost(const Tsp_P_Instance &l, vector<int> path){
 
     double calcCost = 0.0;
-    double sum_ta=0.0;
+    double sum_ta = 0.0;
 
-    lemon::ListDigraphBase::Node n, m;
+    DNode n, m;
 
 
     int tour_size = path.size();
@@ -509,19 +515,14 @@ double pathCost(const Tsp_P_Instance &l, vector<int> path){
 
         Arc a = findArc(l.g, n, m);
 
-        // cout << "arc peso: " << l.weight[a];
-        // cout << " node peso: " << l.weight_node[m] << endl;
-
         sum_ta += l.weight[a];
         calcCost += l.weight_node[m] * sum_ta;
     }
 
-    //cout << "custo: " << calcCost << endl;
-
     return calcCost;
 }
 
-vector<int> getSolucaoVizinha(vector<int> v, int tour_size){
+vector<int> getRandomNeighbor(vector<int> v, int tour_size){
     vector<int> r = v;
     int i = (rand() % tour_size);
     int j = (rand() % tour_size);

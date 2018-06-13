@@ -3,3 +3,5 @@
 #./tsp_p.e -c -i in/gr_ulysses23_lpd -o out/gr_ulysses23_lpd.CONSTR_HEUR.out
 #./tsp_p.e -c -i in/gr_berlin51_lpd  -o out/gr_berlin51_lpd.CONSTR_HEUR.out
 ./tsp_p.e -c  -i in/gr_teste   -o out/gr_test.CONSTR_HEUR.out
+./tsp_p.e -c  -i in/gr_teste1   -o out/gr_test1.CONSTR_HEUR.out
+./tsp_p.e -c  -i in/gr_teste2   -o out/gr_test2.CONSTR_HEUR.out
