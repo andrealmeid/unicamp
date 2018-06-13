@@ -29,7 +29,7 @@ double tsp_p_Decoder::decode(const std::vector< double >& chromosome) const {
 		tour[i] = make_pair(j, chromosome[i]);
 	}
 
-	std::sort(tour.begin(), tour.end(), comparator);
+	sort(tour.begin(), tour.end(), comparator);
 
 	vector<int> path(chromosome.size()+1);
 
@@ -37,10 +37,6 @@ double tsp_p_Decoder::decode(const std::vector< double >& chromosome) const {
 		path[i+1] = tour[i].first;
 
     path[0] = instance.g.id(instance.depot);
-
-    for(unsigned i = 0; i < path.size(); i++)
-        cout << path[i] << " ";
-    cout << endl;
 
 	return pathCost(instance, path);
 }

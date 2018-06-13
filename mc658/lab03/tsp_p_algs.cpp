@@ -31,12 +31,8 @@
 
 // alarm functions
 volatile sig_atomic_t timeout = 0;
-static void alarm_handler(int sig);
 
-static void alarm_handler(int sig)
-{
- 	timeout = 1;
-}
+static void alarm_handler(int sig);
 
 bool naive(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl);
 
@@ -334,43 +330,54 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
     return false;
 }
+
 //------------------------------------------------------------------------------
+/* BRKGA constants */
+#define P 256 // size of population
+#define PE 0.1 // fraction of population to be the elite-set
+#define PM 0.10 // fraction of population to be replaced by mutants
+#define RHOE 0.70 // probability that offspring inherit an allele from elite parent
+#define K 3 // number of independent populations
+#define MAXT 2 // number of threads for parallel decoding
+
+/* BRKGA inner loop (evolution) configuration: Exchange top individuals */
+#define X_INTVL 100 // exchange best individuals at every 100 generations
+#define X_NUMBER 2 // exchange top 2 best
+#define MAX_GENS 1000 // run for 1000 generations
+
+/* BRKGA evolution configuration: restart strategy */
+#define RESET_AFTER 200
+
 bool brkga(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 /* Implemente esta função, entretanto, não altere sua assinatura */
 {
-    const clock_t begin = clock();
+    /*
+    BRKGA TSP-P implementation, mostly based on:
+    https://github.com/rfrancotoso/brkgaAPI/tree/master/examples/brkga-tsp
+    by Rodrigo Franco Toso and Mauricio G.C. Resende
+     */
 
+    // Initialize decoder
     tsp_p_Decoder decoder(l);
 
-    const long unsigned rngSeed = time(0);	// seed to the random number generator
-	MTRand rng(rngSeed);					// initialize the random number generator
+    // Initialize random number generator
+    const long unsigned rngSeed = time(0);
+	MTRand rng(rngSeed);
 
-	const unsigned n = l.n-1;		// size of chromosomes
-	const unsigned p = 256;		// size of population
-	const double pe = 0.10;		// fraction of population to be the elite-set
-	const double pm = 0.10;		// fraction of population to be replaced by mutants
-	const double rhoe = 0.70;	// probability that offspring inherit an allele from elite parent
-	const unsigned K = 3;		// number of independent populations
-    const unsigned MAXT = 2; // number of threads for parallel decoding
+    // size of chromosomes
+    const unsigned tour_size = l.n-1;
 
-    BRKGA< tsp_p_Decoder, MTRand > algorithm(n, p, pe, pm, rhoe, decoder, rng, K, MAXT);
+    BRKGA< tsp_p_Decoder, MTRand > algorithm(tour_size, P, PE, PM, RHOE, decoder, rng, K, MAXT);
 
-    // BRKGA inner loop (evolution) configuration: Exchange top individuals
-	const unsigned X_INTVL = 100;	// exchange best individuals at every 100 generations
-	const unsigned X_NUMBER = 2;	// exchange top 2 best
-	const unsigned MAX_GENS = 1000;	// run for 1000 gens
+    // last relevant generation: best updated or reset called
+    unsigned relevantGeneration = 1;
 
-	// BRKGA evolution configuration: restart strategy
-	unsigned relevantGeneration = 1;	// last relevant generation: best updated or reset called
-	const unsigned RESET_AFTER = 200;
-	std::vector< double > bestChromosome;
-    double bestFitness = std::numeric_limits< double >::max();
-
-    std::cout << "Running for " << MAX_GENS << " generations without multi-threading..." << std::endl;
+    // global variables to store best global solution
+	vector< double > bestChromosome;
+    double bestFitness = numeric_limits< double >::max();
 
     // Run the evolution loop:
-	unsigned generation = 1;		// current generation
-	do {
+	for(unsigned generation = 1; generation < MAX_GENS; generation++){
 		algorithm.evolve();	// evolve the population for one generation
 
 		// Bookeeping: has the best solution thus far improved?
@@ -379,93 +386,49 @@ bool brkga(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 			relevantGeneration = generation;
 			bestFitness = algorithm.getBestFitness();
 			bestChromosome = algorithm.getBestChromosome();
-
-			std::cout << "\t" << generation
-					<< ") Improved best solution thus far: "
-					<< bestFitness << std::endl;
 		}
 
 		//  Evolution strategy: restart
 		if(generation - relevantGeneration > RESET_AFTER) {
 			algorithm.reset();	// restart the algorithm with random keys
 			relevantGeneration = generation;
-
-			std::cout << "\t" << generation << ") Reset at generation "
-					<< generation << std::endl;
 		}
 
 		// Evolution strategy: exchange top individuals among the populations
-		if(generation % X_INTVL == 0 && relevantGeneration != generation) {
+		if(generation % X_INTVL == 0 && relevantGeneration != generation)
 			algorithm.exchangeElite(X_NUMBER);
-
-			std::cout << "\t" << generation
-					<< ") Exchanged top individuals." << std::endl;
-		}
-
-		// Next generation?
-		++generation;
-	} while (generation < MAX_GENS);
-
-	// print the fitness of the top 10 individuals of each population:
-	std::cout << "Fitness of the top 10 individuals of each population:" << std::endl;
-	const unsigned bound = std::min(p, unsigned(10));	// makes sure we have 10 individuals
-	for(unsigned i = 0; i < K; ++i) {
-		std::cout << "Population #" << i << ":" << std::endl;
-		for(unsigned j = 0; j < bound; ++j) {
-			std::cout << "\t" << j << ") "
-					<< algorithm.getPopulation(i).getFitness(j) << std::endl;
-		}
 	}
 
-	// rebuild the best solution:
-    DNode depot;
+	// rebuild the best solution from the best chromosome
     s.tour.clear();
     s.cost = bestFitness;
 
+    DNode depot;
     depot = l.depot; //tour begins at s
+    int depot_id = l.g.id(depot);
     s.tour.push_back(depot);
 
-    vector<pair<int, double>> tour(bestChromosome.size());
+    vector<pair<int, double>> tour(tour_size);
 
-    for(unsigned i = 0, j = 0; i < bestChromosome.size(); i++, j++) {
-		if((int) i == l.g.id(depot))
+    for(unsigned i = 0, j = 0; i < tour_size; i++, j++) {
+		if((int) i == depot_id)
 			j++;
 		tour[i] = make_pair(j, bestChromosome[i]);
 	}
 
-	std::sort(tour.begin(), tour.end(), comparator);
+	sort(tour.begin(), tour.end(), comparator);
 
-	vector<int> path(bestChromosome.size()+1);
+	vector<int> path(tour_size+1);
 
-	for(unsigned i = 0; i < bestChromosome.size(); i++)
+	for(unsigned i = 0; i < tour_size; i++)
 		path[i+1] = tour[i].first;
 
     path[0] = l.g.id(l.depot);
 
-    for(unsigned i = 0; i < path.size(); i++)
-        cout << path[i] << " ";
-    cout << endl;
-
-
-    for(unsigned i = 1; i < bestChromosome.size()+1; i++){
+    for(unsigned i = 1; i < tour_size+1; i++){
         lemon::ListDigraphBase::Node w = l.g.nodeFromId(path[i]);
-        cout << l.g.id(w) << " ";
         s.tour.push_back(w);
     }
-
-    cout << endl;
-
-	// print its distance:
-	std::cout << "Best solution found has objective value = "
-	 		<< pathCost(l, path) << std::endl;
-
-	// print its best tour:
-	std::cout << "Best tour:";
-    printVector(path);
-	std::cout << std::endl;
-
-	const clock_t end = clock();
-    std::cout << "BRKGA run finished in " << (end - begin) / double(CLOCKS_PER_SEC) << " s." << std::endl;
 
     return false;
 }
@@ -520,6 +483,11 @@ bool naive(const Tsp_P_Instance &instance, Tsp_P_Solution  &sol, int tl)
     return false;
 }
 //------------------------------------------------------------------------------
+
+static void alarm_handler(int sig)
+{
+ 	timeout = 1;
+}
 
 bool comparator (pair<int, double> i, pair<int, double> j) {
 	return (i.second < j.second);
