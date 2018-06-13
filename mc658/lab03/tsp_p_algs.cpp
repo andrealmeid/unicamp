@@ -201,7 +201,7 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 /* Implemente esta função, entretanto, não altere sua assinatura */
 {
-    /*  simulated annealing implementation  */
+    /*  simulated annealing implementation for TSP-P  */
 
     // initizalize alarm
     signal(SIGALRM, alarm_handler);
@@ -324,7 +324,7 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     s.tour.push_back(l.depot);
 
     for(int i = 1; i < tour_size; i++){
-        lemon::ListDigraphBase::Node node = l.g.nodeFromId(best_path[i]);
+        DNode node = l.g.nodeFromId(best_path[i]);
         s.tour.push_back(node);
     }
 
@@ -367,7 +367,8 @@ bool brkga(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     // size of chromosomes
     const unsigned tour_size = l.n-1;
 
-    BRKGA< tsp_p_Decoder, MTRand > algorithm(tour_size, P, PE, PM, RHOE, decoder, rng, K, MAXT);
+    BRKGA< tsp_p_Decoder, MTRand > algorithm(
+        tour_size, P, PE, PM, RHOE, decoder, rng, K, MAXT);
 
     // last relevant generation: best updated or reset called
     unsigned relevantGeneration = 1;
@@ -406,28 +407,27 @@ bool brkga(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     DNode depot;
     depot = l.depot; //tour begins at s
     int depot_id = l.g.id(depot);
-    s.tour.push_back(depot);
 
+    // creates a tour: a pair(vertex index, chromosome value)
     vector<pair<int, double>> tour(tour_size);
 
+    // place the vertex ordered by index
     for(unsigned i = 0, j = 0; i < tour_size; i++, j++) {
 		if((int) i == depot_id)
 			j++;
 		tour[i] = make_pair(j, bestChromosome[i]);
 	}
 
+    // sort the tour by the chromosome
 	sort(tour.begin(), tour.end(), comparator);
 
-	vector<int> path(tour_size+1);
+    // tour begins at depot
+    s.tour.push_back(depot);
 
-	for(unsigned i = 0; i < tour_size; i++)
-		path[i+1] = tour[i].first;
-
-    path[0] = l.g.id(l.depot);
-
-    for(unsigned i = 1; i < tour_size+1; i++){
-        lemon::ListDigraphBase::Node w = l.g.nodeFromId(path[i]);
-        s.tour.push_back(w);
+    // fills the tour with BRKGA's output
+    for(unsigned i = 0; i < tour_size; i++){
+        DNode node = l.g.nodeFromId(tour[i].first);
+        s.tour.push_back(node);
     }
 
     return false;
