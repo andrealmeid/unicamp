@@ -18,7 +18,6 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <unistd.h>
-
 #include <time.h>
 
 #include "mygraphlib.h"
@@ -26,6 +25,7 @@
 #include "tsp_p_Decoder.h"
 #include "MTRand.h"
 #include "BRKGA.h"
+#include "gurobi_c++.h"
 
 #define DEBUG 0
 #define OUTARCIT 0
@@ -442,7 +442,36 @@ bool brkga(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 /* Implemente esta função, entretanto, não altere sua assinatura */
 {
-   return naive(l, s, tl);
+    GRBEnv *env;
+    env = new GRBEnv();
+    GRBModel model = GRBModel(*env);
+
+    int i, j, n = l.n;
+
+    // x_ij = 0 || 1
+    GRBVar **x = NULL;
+
+    for (i = 0; i < n; i++) {
+        for (j = 0; j <= i; j++) {
+            x[i][j] = model.addVar(0.0, 1.0,                          GRB_BINARY, 'x');
+        x[j][i] = x[i][j];
+        }
+    }
+
+    // sum x_ij = 2
+    // Degree-2 constraints
+    for (i = 0; i < n; i++) {
+      GRBLinExpr expr = 0;
+      for (j = 0; j < n; j++)
+        expr += x[i][j];
+      model.addConstr(expr == 2);
+    }
+
+    // sum x_ii = 0
+    for (i = 0; i < n; i++)
+        x[i][i].set(GRB_DoubleAttr_UB, 0);
+
+    return naive(l, s, tl);
 }
 //------------------------------------------------------------------------------
 bool naive(const Tsp_P_Instance &instance, Tsp_P_Solution  &sol, int tl)
