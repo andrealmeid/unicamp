@@ -30,6 +30,55 @@
 #define DEBUG 0
 #define OUTARCIT 0
 
+void findsubtour(int n, double** sol, int* tourlenP, int* tour);
+
+
+class subtourelim: public GRBCallback
+{
+  public:
+    GRBVar** vars;
+    int n;
+    subtourelim(GRBVar** xvars, int xn) {
+      vars = xvars;
+      n    = xn;
+    }
+  protected:
+    void callback() {
+      try {
+        if (where == GRB_CB_MIPSOL) {
+          // Found an integer feasible solution - does it visit every node?
+          double **x = new double*[n];
+          int *tour = new int[n];
+          int i, j, len;
+          for (i = 0; i < n; i++)
+            x[i] = getSolution(vars[i], n);
+
+          findsubtour(n, x, &len, tour);
+
+          if (len < n) {
+            // Add subtour elimination constraint
+            GRBLinExpr expr = 0;
+            for (i = 0; i < len; i++)
+              for (j = i+1; j < len; j++)
+                expr += vars[tour[i]][tour[j]];
+            addLazy(expr <= len-1);
+          }
+
+          for (i = 0; i < n; i++)
+            delete[] x[i];
+          delete[] x;
+          delete[] tour;
+        }
+      } catch (GRBException e) {
+        cout << "Error number: " << e.getErrorCode() << endl;
+        cout << e.getMessage() << endl;
+      } catch (...) {
+        cout << "Error during callback" << endl;
+      }
+    }
+};
+
+
 // alarm functions
 volatile sig_atomic_t timeout = 0;
 
@@ -442,14 +491,19 @@ bool brkga(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 /* Implemente esta função, entretanto, não altere sua assinatura */
 {
-    GRBEnv *env;
+
+  try {
+    int i, j, n = l.n;
+    GRBEnv *env = NULL;
     env = new GRBEnv();
     GRBModel model = GRBModel(*env);
 
-    int i, j, n = l.n;
-
     // x_ij = 0 || 1
     GRBVar **x = NULL;
+
+    x = new GRBVar*[n];
+    for (i = 0; i < n; i++)
+        x[i] = new GRBVar[n];
 
     for (i = 0; i < n; i++) {
         for (j = 0; j <= i; j++) {
@@ -470,6 +524,20 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     // sum x_ii = 0
     for (i = 0; i < n; i++)
         x[i][i].set(GRB_DoubleAttr_UB, 0);
+
+    subtourelim cb = subtourelim(x, n);
+    model.setCallback(&cb);
+
+    Optimize model
+
+    model.optimize();
+
+    } catch (GRBException e) {
+      cout << "Error number: " << e.getErrorCode() << endl;
+      cout << e.getMessage() << endl;
+    } catch (...) {
+      cout << "Error during optimization" << endl;
+    }
 
     return naive(l, s, tl);
 }
@@ -624,4 +692,51 @@ vector<int> getFirstSolution(int depot_id, int tour_size){
     }
 
     return v;
+}
+
+void findsubtour(int      n, double** sol, int*     tourlenP, int*     tour)
+{
+  bool* seen = new bool[n];
+  int bestind, bestlen;
+  int i, node, len, start;
+
+  for (i = 0; i < n; i++)
+    seen[i] = false;
+
+  start = 0;
+  bestlen = n+1;
+  bestind = -1;
+  node = 0;
+  while (start < n) {
+    for (node = 0; node < n; node++)
+      if (!seen[node])
+        break;
+    if (node == n)
+      break;
+    for (len = 0; len < n; len++) {
+      tour[start+len] = node;
+      seen[node] = true;
+      for (i = 0; i < n; i++) {
+        if (sol[node][i] > 0.5 && !seen[i]) {
+          node = i;
+          break;
+        }
+      }
+      if (i == n) {
+        len++;
+        if (len < bestlen) {
+          bestlen = len;
+          bestind = start;
+        }
+        start += len;
+        break;
+      }
+    }
+  }
+
+  for (i = 0; i < bestlen; i++)
+    tour[i] = tour[bestind+i];
+  *tourlenP = bestlen;
+
+  delete[] seen;
 }
