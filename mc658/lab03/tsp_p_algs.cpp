@@ -1,5 +1,5 @@
 /*******************************************************************************
- ** VERSION: 1.0
+ * VERSION: 1.0
  * MC658 - Projeto e Análise de Algoritmos III - 1s2018
  * Prof: Flavio Keidi Miyazawa
  * PED: Francisco Jhonatas Melo da Silva
@@ -507,7 +507,8 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
     for (i = 0; i < n; i++) {
         for (j = 0; j <= i; j++) {
-            x[i][j] = model.addVar(0.0, 1.0,                          GRB_BINARY, 'x');
+            double value = l.weight[findArc(l.g, l.g.nodeFromId(i), l.g.nodeFromId(j))];
+            x[i][j] = model.addVar(0.0, 1.0, value, GRB_BINARY, "x");
         x[j][i] = x[i][j];
         }
     }
@@ -528,9 +529,30 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     subtourelim cb = subtourelim(x, n);
     model.setCallback(&cb);
 
-    Optimize model
-
+    model.update();
     model.optimize();
+
+    if (model.get(GRB_IntAttr_SolCount) > 0) {
+      double **sol = new double*[n];
+      for (i = 0; i < n; i++)
+        sol[i] = model.get(GRB_DoubleAttr_X, x[i], n);
+
+      int* tour = new int[n];
+      int len;
+
+      findsubtour(n, sol, &len, tour);
+      if(len == n) cout << "eita";
+
+      cout << "Tour: ";
+      for (i = 0; i < len; i++)
+        cout << tour[i] << " ";
+      cout << endl;
+
+      for (i = 0; i < n; i++)
+        delete[] sol[i];
+      delete[] sol;
+      delete[] tour;
+    }
 
     } catch (GRBException e) {
       cout << "Error number: " << e.getErrorCode() << endl;
