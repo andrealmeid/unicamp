@@ -492,11 +492,15 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 /* Implemente esta função, entretanto, não altere sua assinatura */
 {
 
+  // http://www.gurobi.com/documentation/7.5/examples/tsp_cpp_cpp.html
+
   try {
     int i, j, n = l.n;
     GRBEnv *env = NULL;
     env = new GRBEnv();
     GRBModel model = GRBModel(*env);
+
+     model.set(GRB_IntParam_LazyConstraints, 1);
 
     // x_ij = 0 || 1
     GRBVar **x = NULL;
@@ -544,14 +548,21 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
       if(len == n) cout << "eita";
 
       cout << "Tour: ";
-      for (i = 0; i < len; i++)
+      for (i = 0; i < len; i++){
         cout << tour[i] << " ";
+        s.tour.push_back(l.g.nodeFromId(tour[i]));
+      }
       cout << endl;
 
       for (i = 0; i < n; i++)
         delete[] sol[i];
       delete[] sol;
       delete[] tour;
+      
+      s.cost = model.getObjective().getValue();
+
+      return false;
+     
     }
 
     } catch (GRBException e) {
@@ -561,6 +572,7 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
       cout << "Error during optimization" << endl;
     }
 
+       
     return naive(l, s, tl);
 }
 //------------------------------------------------------------------------------
