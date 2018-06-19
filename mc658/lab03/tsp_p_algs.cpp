@@ -110,8 +110,8 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 /* Implemente esta função, entretanto, não altere sua assinatura */
 {
     // initiate alarm
-   	signal(SIGALRM, alarm_handler);
-	alarm(tl);
+    signal(SIGALRM, alarm_handler);
+    alarm(tl);
 
     // Initialize solution
     s.tour.clear();
@@ -415,7 +415,7 @@ bool brkga(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
     // Initialize random number generator
     const long unsigned rngSeed = time(0);
-	MTRand rng(rngSeed);
+    MTRand rng(rngSeed);
 
     // size of chromosomes
     const unsigned tour_size = l.n-1;
@@ -427,35 +427,35 @@ bool brkga(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     unsigned relevantGeneration = 1;
 
     // global variables to store best global solution
-	vector< double > bestChromosome;
+    vector< double > bestChromosome;
     double bestFitness = numeric_limits< double >::max();
 
     // Run the evolution loop:
-	for(unsigned generation = 1; generation < MAX_GENS; generation++){
+    for(unsigned generation = 1; generation < MAX_GENS; generation++){
         if (timeout) break; // time's up! return current solution
 
-		algorithm.evolve();	// evolve the population for one generation
+        algorithm.evolve(); // evolve the population for one generation
 
-		// Bookeeping: has the best solution thus far improved?
-		if(algorithm.getBestFitness() < bestFitness) {
-			// Save the best solution to be used after the evolution chain:
-			relevantGeneration = generation;
-			bestFitness = algorithm.getBestFitness();
-			bestChromosome = algorithm.getBestChromosome();
-		}
+        // Bookeeping: has the best solution thus far improved?
+        if(algorithm.getBestFitness() < bestFitness) {
+            // Save the best solution to be used after the evolution chain:
+            relevantGeneration = generation;
+            bestFitness = algorithm.getBestFitness();
+            bestChromosome = algorithm.getBestChromosome();
+        }
 
-		//  Evolution strategy: restart
-		if(generation - relevantGeneration > RESET_AFTER) {
-			algorithm.reset();	// restart the algorithm with random keys
-			relevantGeneration = generation;
-		}
+        //  Evolution strategy: restart
+        if(generation - relevantGeneration > RESET_AFTER) {
+            algorithm.reset();  // restart the algorithm with random keys
+            relevantGeneration = generation;
+        }
 
-		// Evolution strategy: exchange top individuals among the populations
-		if(generation % X_INTVL == 0 && relevantGeneration != generation)
-			algorithm.exchangeElite(X_NUMBER);
-	}
+        // Evolution strategy: exchange top individuals among the populations
+        if(generation % X_INTVL == 0 && relevantGeneration != generation)
+            algorithm.exchangeElite(X_NUMBER);
+    }
 
-	// rebuild the best solution from the best chromosome
+    // rebuild the best solution from the best chromosome
     s.tour.clear();
     s.cost = bestFitness;
 
@@ -466,15 +466,15 @@ bool brkga(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     // creates a tour: a pair(vertex index, chromosome value)
     vector<pair<int, double>> tour(tour_size);
 
-	// fill vector with vertexes ordered by index
+    // fill vector with vertexes ordered by index
     for(unsigned i = 0, j = 0; i < tour_size; i++, j++) {
-		if((int) i == depot_id)
-			j++;
-		tour[i] = make_pair(j, bestChromosome[i]);
-	}
+        if((int) i == depot_id)
+            j++;
+        tour[i] = make_pair(j, bestChromosome[i]);
+    }
 
     // sort the tour by chromosome
-	sort(tour.begin(), tour.end(), comparator);
+    sort(tour.begin(), tour.end(), comparator);
 
     // tour begins at depot
     s.tour.push_back(depot);
@@ -500,7 +500,7 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     env = new GRBEnv();
     GRBModel model = GRBModel(*env);
 
-     model.set(GRB_IntParam_LazyConstraints, 1);
+    model.set(GRB_IntParam_LazyConstraints, 1);
 
     // x_ij = 0 || 1
     GRBVar **x = NULL;
@@ -509,22 +509,65 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     for (i = 0; i < n; i++)
         x[i] = new GRBVar[n];
 
+    GRBVar *tempo = new GRBVar[n];
+
+    // calculates the sum of all times
+    // find most pesado arc
+    double total_time = 0;
+    double biggest_time = 0;
+    for(ListDigraph::ArcIt arc(l.g); arc != INVALID; ++arc){
+        double current_time = l.weight[arc];
+        if(current_time > biggest_time)
+            biggest_time = current_time;
+    }
+
+    total_time = biggest_time * n;
+
+	cout << "pesadaum " << total_time << endl;
+
+    // tempo de cada no
+    i = 0;
+    for(ListDigraph::NodeIt node(l.g); node != INVALID; ++node){
+	cout << l.g.id(node) << endl;
+        tempo[l.g.id(node)] = model.addVar(0.0, total_time, l.weight_node[node], GRB_CONTINUOUS, "t");
+}
+
+    // x_ij = variavel que determina se arco esta ou nao na solucao
     for (i = 0; i < n; i++) {
-        for (j = 0; j <= i; j++) {
-            double value = l.weight[findArc(l.g, l.g.nodeFromId(i), l.g.nodeFromId(j))];
-            x[i][j] = model.addVar(0.0, 1.0, value, GRB_BINARY, "x");
-        x[j][i] = x[i][j];
+        for (j = 0; j < n; j++) {
+            x[i][j] = model.addVar(0.0, 1.0, 0, GRB_BINARY, "x");
         }
     }
 
     // sum x_ij = 2
     // Degree-2 constraints
     for (i = 0; i < n; i++) {
-      GRBLinExpr expr = 0;
-      for (j = 0; j < n; j++)
-        expr += x[i][j];
-      model.addConstr(expr == 2);
+      GRBLinExpr expr_in = 0;
+      GRBLinExpr expr_out = 0;
+      for (j = 0; j < n; j++){
+        expr_in += x[i][j];
+        expr_out += x[j][i];
+      }
+      model.addConstr(expr_out == 1);
+      model.addConstr(expr_in == 1);
     }
+
+    model.addConstr(tempo[l.g.id(l.depot)] == 0);
+    // v = tempo[]
+    // vj >= vi + tij - (1-xij)M
+
+
+    for (i = 0; i < n; i++){
+        for (j = 0; j < n; j++){
+	   if (i == j)
+		continue;
+            double value = l.weight[findArc(l.g, l.g.nodeFromId(i), l.g.nodeFromId(j))];
+	    cout << value << endl;
+            model.addConstr(tempo[j] >= tempo[i] + value - (1 - x[i][j]) * total_time);
+        }    
+    }
+    
+    // vj <= vi + tij + (1-xij)M
 
     // sum x_ii = 0
     for (i = 0; i < n; i++)
@@ -545,7 +588,7 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
       int len;
 
       findsubtour(n, sol, &len, tour);
-      if(len == n) cout << "eita";
+      if(len < n) cout << "eita" << endl;
 
       cout << "Tour: ";
       for (i = 0; i < len; i++){
@@ -623,11 +666,11 @@ bool naive(const Tsp_P_Instance &instance, Tsp_P_Solution  &sol, int tl)
 
 static void alarm_handler(int sig)
 {
- 	timeout = 1;
+    timeout = 1;
 }
 
 bool comparator (pair<int, double> i, pair<int, double> j) {
-	return (i.second < j.second);
+    return (i.second < j.second);
 }
 
 double pathCost(const Tsp_P_Instance &l, vector<int> path){
