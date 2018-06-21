@@ -525,11 +525,20 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
 	cout << "pesadaum " << total_time << endl;
 
+    // vetor de nos
+    //vector<int> nodes_id;
+    vector<DNode> nodes(n);
+    for(ListDigraph::NodeIt node(l.g); node != INVALID; ++node){
+        //nodes_id.push_back(l.g.id(node));
+        nodes[l.g.id(node)] = node;
+    }
+    
+
     // tempo de cada no
     i = 0;
-    for(ListDigraph::NodeIt node(l.g); node != INVALID; ++node){
-	cout << l.g.id(node) << endl;
-        tempo[l.g.id(node)] = model.addVar(0.0, total_time, l.weight_node[node], GRB_CONTINUOUS, "t");
+    for(int i = 0; i < n; i++){
+        cout << "id: " << i << " peso: " << l.weight_node[nodes[i]] << endl;
+        tempo[i] = model.addVar(0.0, total_time, l.weight_node[nodes[i]], GRB_CONTINUOUS, "t");
 }
 
     // x_ij = variavel que determina se arco esta ou nao na solucao
@@ -553,27 +562,25 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     }
 
     model.addConstr(tempo[l.g.id(l.depot)] == 0);
+    cout << "depot id: " << l.g.id(l.depot) << endl;
     // v = tempo[]
     // vj >= vi + tij - (1-xij)M
 
 
     for (i = 0; i < n; i++){
+        if (i == l.g.id(l.depot)) continue;
+
         for (j = 0; j < n; j++){
             if (i == j)
                 x[i][i].set(GRB_DoubleAttr_UB, 0);
 
-            else if (i == 0 || j == 0)
-                //x[i][j].set(GRB_DoubleAttr_UB, 0);
-                continue;
-
-
             else {
-                double value = l.weight[findArc(l.g, l.g.nodeFromId(i), l.g.nodeFromId(j))];
-                model.addConstr(tempo[j] >= tempo[i] + value - (1 - x[i][j]) * total_time);
+                double value = l.weight[findArc(l.g, nodes[i], nodes[j])];
+                model.addConstr(tempo[i] >= tempo[j] + value - (1 - x[i][j]) * total_time);
             }
-        }    
+        }
     }
-    
+     // cout << "arco(" << i << "," << j << "): " << value << endl;
     // vj <= vi + tij + (1-xij)M
 
     // sum x_ii = 0
@@ -600,7 +607,7 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
       cout << "Tour: ";
       for (i = 0; i < len; i++){
         cout << tour[i] << " ";
-        s.tour.push_back(l.g.nodeFromId(tour[i]));
+        s.tour.push_back(nodes[tour[i]]);
       }
       cout << endl;
 
@@ -623,7 +630,7 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     }
 
        
-    return naive(l, s, tl);
+    //return naive(l, s, tl);
 }
 //------------------------------------------------------------------------------
 bool naive(const Tsp_P_Instance &instance, Tsp_P_Solution  &sol, int tl)
