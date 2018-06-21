@@ -559,19 +559,26 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
     for (i = 0; i < n; i++){
         for (j = 0; j < n; j++){
-	   if (i == j)
-		continue;
-            double value = l.weight[findArc(l.g, l.g.nodeFromId(i), l.g.nodeFromId(j))];
-	    cout << value << endl;
-            model.addConstr(tempo[j] >= tempo[i] + value - (1 - x[i][j]) * total_time);
+            if (i == j)
+                x[i][i].set(GRB_DoubleAttr_UB, 0);
+
+            else if (i == 0 || j == 0)
+                //x[i][j].set(GRB_DoubleAttr_UB, 0);
+                continue;
+
+
+            else {
+                double value = l.weight[findArc(l.g, l.g.nodeFromId(i), l.g.nodeFromId(j))];
+                model.addConstr(tempo[j] >= tempo[i] + value - (1 - x[i][j]) * total_time);
+            }
         }    
     }
     
     // vj <= vi + tij + (1-xij)M
 
     // sum x_ii = 0
-    for (i = 0; i < n; i++)
-        x[i][i].set(GRB_DoubleAttr_UB, 0);
+    //for (i = 0; i < n; i++)
+    //    x[i][i].set(GRB_DoubleAttr_UB, 0);
 
     subtourelim cb = subtourelim(x, n);
     model.setCallback(&cb);
