@@ -567,25 +567,25 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     // vj >= vi + tij - (1-xij)M
 
 
-    for (i = 0; i < n; i++){
-        if (i == l.g.id(l.depot)) continue;
+    for (j = 0; j < n; j++){
+        if (j == l.g.id(l.depot)) continue;
 
-        for (j = 0; j < n; j++){
-            if (i == j)
-                x[i][i].set(GRB_DoubleAttr_UB, 0);
+        for (i = 0; i < n; i++){
+           // if (i == j)
+           //     x[i][i].set(GRB_DoubleAttr_UB, 0);
 
-            else {
-                double value = l.weight[findArc(l.g, nodes[i], nodes[j])];
-                model.addConstr(tempo[i] >= tempo[j] + value - (1 - x[i][j]) * total_time);
-            }
+            //else {
+            double value = l.weight[findArc(l.g, nodes[i], nodes[j])];
+                model.addConstr(tempo[j] >= tempo[i] + value - (1 - x[i][j]) * total_time);
+            //}
         }
     }
      // cout << "arco(" << i << "," << j << "): " << value << endl;
     // vj <= vi + tij + (1-xij)M
 
     // sum x_ii = 0
-    //for (i = 0; i < n; i++)
-    //    x[i][i].set(GRB_DoubleAttr_UB, 0);
+    for (i = 0; i < n; i++)
+        x[i][i].set(GRB_DoubleAttr_UB, 0);
 
     subtourelim cb = subtourelim(x, n);
     model.setCallback(&cb);
