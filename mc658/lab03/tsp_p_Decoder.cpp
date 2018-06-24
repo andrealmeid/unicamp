@@ -5,7 +5,27 @@
  *      Author: rtoso
  */
 
-#include "tsp_p_Decoder.h"
+#ifndef TSP_P_DECODER_H
+#define TSP_P_DECODER_H
+
+#include <list>
+#include <vector>
+#include <algorithm>
+#include "tsp_p.h"
+
+
+class tsp_p_Decoder {
+public:
+	tsp_p_Decoder(const Tsp_P_Instance& instance);
+	~tsp_p_Decoder();
+
+	double decode(const std::vector< double >& chromosome) const;
+
+private:
+	const Tsp_P_Instance& instance;
+};
+
+#endif
 
 bool comparator (pair<int, double> i, pair<int, double> j);
 

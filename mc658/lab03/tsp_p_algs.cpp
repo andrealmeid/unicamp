@@ -28,7 +28,6 @@
 #include "gurobi_c++.h"
 
 #define DEBUG 0
-#define OUTARCIT 0
 
 void findsubtour(int n, double** sol, int* tourlenP, int* tour);
 
@@ -139,7 +138,6 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     path.push_back(depot_id);
 
     DNode source, target;
-    #if !OUTARCIT
     // auxiliar variables
     int lowest_cost = (int) DBL_MAX;
     int lowest_id = 0;
@@ -206,33 +204,7 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
         }
         avalibleVertices.pop_back();
     }
-    #endif
 
-
-    #if OUTARCIT
-    double arc_value, sum_tour = 0;
-    int j, cost;
-    for(int i = 1; i < l.n; i++){
-        arc_value = DBL_MAX;
-
-        for (OutArcIt a(l.g, s.tour.back()); a != INVALID; ++a){
-
-            for(j = 0; j < i && l.g.target(a) != s.tour[j]; j++);
-            if(j < i) continue;
-
-            cost = (sum_tour + l.weight[a]) * l.weight_node[l.g.target(a)];
-
-            if(cost <= arc_value){
-                arc_value = cost;
-                arc_min = a;
-            }
-        }
-
-        sum_tour += l.weight[arc_min];
-        s.cost += l.weight_node[l.g.target(arc_min)] * sum_tour;
-        s.tour.push_back(l.g.target(arc_min));
-    }
-    #endif
 
     #if DEBUG
     cout << "sum = " << s.cost << endl;
@@ -242,9 +214,9 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
 //------------------------------------------------------------------------------
 #define INITAL_TEMPERATURE 100
-#define MIN_TEMPERATURE 10
-#define INNER_LIMIT 100 // inner loop limit
-#define ALPHA_PARAM 0.85 // alpha parameter of geometric decay
+#define MIN_TEMPERATURE 1
+#define INNER_LIMIT 1000 // inner loop limit
+#define ALPHA_PARAM 0.99 // alpha parameter of geometric decay
 #define K_PARAM 2 // k parameter that multiplies temperature
 
 bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
@@ -311,7 +283,8 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
             }
 
             // neighbor solution = 2-OPT
-            vector<int> neighbor_path = opt2(current_path, l);
+//            vector<int> neighbor_path = opt2(current_path, l);
+            vector<int> neighbor_path = getRandomNeighbor(current_path, tour_size - 1);
             int neighbor_value = pathCost(l, neighbor_path);
 
             double diff = neighbor_value - current_value;
@@ -362,9 +335,13 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
         temperature = temperature * ALPHA_PARAM;
     }
 
+    best_path = opt2(best_path, l);
+
+    #if DEBUG
     cout << "solucao final: ";
     printVector(best_path);
     cout << " valor: " << best_value << endl;
+    #endif
 
     // set's current best global solution as solution
     s.cost = best_value;
