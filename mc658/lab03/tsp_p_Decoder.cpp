@@ -5,9 +5,6 @@
  *      Author: rtoso
  */
 
-#ifndef TSP_P_DECODER_H
-#define TSP_P_DECODER_H
-
 #include <list>
 #include <vector>
 #include <algorithm>
@@ -25,7 +22,6 @@ private:
 	const Tsp_P_Instance& instance;
 };
 
-#endif
 
 bool comparator (pair<int, double> i, pair<int, double> j);
 

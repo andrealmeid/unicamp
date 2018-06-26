@@ -22,12 +22,27 @@
 
 #include "mygraphlib.h"
 #include "tsp_p_algs.h"
-#include "tsp_p_Decoder.h"
 #include "MTRand.h"
 #include "BRKGA.h"
 #include "gurobi_c++.h"
 
 #define DEBUG 0
+
+/* if META_2OPT, meta-heuristic will use 2-OPT to find a neighbor
+   else, it will use getRandomNeighbor function */
+#define META_2OPT false
+
+class tsp_p_Decoder {
+public:
+	tsp_p_Decoder(const Tsp_P_Instance& instance);
+	~tsp_p_Decoder();
+
+	double decode(const std::vector< double >& chromosome) const;
+
+private:
+	const Tsp_P_Instance& instance;
+};
+
 
 void findsubtour(int n, double** sol, int* tourlenP, int* tour);
 
@@ -283,8 +298,12 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
             }
 
             // neighbor solution = 2-OPT
-//            vector<int> neighbor_path = opt2(current_path, l);
+            #if META_2OPT
+            vector<int> neighbor_path = opt2(current_path, l);
+            #else
             vector<int> neighbor_path = getRandomNeighbor(current_path, tour_size - 1);
+            #endif
+
             int neighbor_value = pathCost(l, neighbor_path);
 
             double diff = neighbor_value - current_value;
@@ -509,7 +528,7 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
         //nodes_id.push_back(l.g.id(node));
         nodes[l.g.id(node)] = node;
     }
-    
+
 
     // tempo de cada no
     i = 0;
@@ -592,11 +611,11 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
         delete[] sol[i];
       delete[] sol;
       delete[] tour;
-      
+
       s.cost = model.getObjective().getValue();
 
       return false;
-     
+
     }
 
     } catch (GRBException e) {
@@ -606,7 +625,7 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
       cout << "Error during optimization" << endl;
     }
 
-       
+
     //return naive(l, s, tl);
 }
 //------------------------------------------------------------------------------
