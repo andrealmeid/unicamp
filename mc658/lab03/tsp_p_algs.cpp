@@ -228,8 +228,8 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 }
 
 //------------------------------------------------------------------------------
-#define INITAL_TEMPERATURE 100
-#define MIN_TEMPERATURE 1
+#define INITAL_TEMPERATURE 1000
+#define MIN_TEMPERATURE 10
 #define INNER_LIMIT 1000 // inner loop limit
 #define ALPHA_PARAM 0.99 // alpha parameter of geometric decay
 #define K_PARAM 2 // k parameter that multiplies temperature
@@ -264,11 +264,12 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     vector<int> current_path(tour_size);
     current_path[0] = depot_id;
 
-    // initial path (sorted indicies)
-    for(int i = 1, j = 0; i < tour_size; i++){
-        if(j == depot_id)
-            j++;
-        current_path[i] = j++;
+    Tsp_P_Solution constrSolution;
+    constrHeur(l, constrSolution, tl);
+
+    // initial path from constrHeur
+    for(int i = 1; i < tour_size; i++){
+        current_path[i] = l.g.id(constrSolution.tour[i]);
     }
 
     int current_value = pathCost(l, current_path);
@@ -297,7 +298,7 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
                 break;
             }
 
-            // neighbor solution = 2-OPT
+            // neighbor solution = 2-OPT or random neighbor
             #if META_2OPT
             vector<int> neighbor_path = opt2(current_path, l);
             #else
@@ -354,8 +355,6 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
         temperature = temperature * ALPHA_PARAM;
     }
 
-    best_path = opt2(best_path, l);
-
     #if DEBUG
     cout << "solucao final: ";
     printVector(best_path);
@@ -372,6 +371,8 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
         DNode node = l.g.nodeFromId(best_path[i]);
         s.tour.push_back(node);
     }
+
+    //std::vector<int> v = best_path;
 
     return false;
 }
@@ -585,6 +586,10 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
     subtourelim cb = subtourelim(x, n);
     model.setCallback(&cb);
+
+    // bound the execution time
+    if (tl > 0)
+        model.getEnv().set(GRB_DoubleParam_TimeLimit, tl);
 
     model.update();
     model.optimize();
