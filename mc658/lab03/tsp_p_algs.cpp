@@ -499,6 +499,8 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
     model.set(GRB_IntParam_LazyConstraints, 1);
 
+    model.set(GRB_IntParam_OutputFlag, 0);
+
     // x_ij = 0 || 1
     GRBVar **x = NULL;
 
@@ -520,7 +522,9 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
     total_time = biggest_time * n;
 
+    #if DEBUG
 	cout << "pesadaum " << total_time << endl;
+    #endif
 
     // vetor de nos
     //vector<int> nodes_id;
@@ -534,7 +538,10 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     // tempo de cada no
     i = 0;
     for(int i = 0; i < n; i++){
+        #if DEBUG
         cout << "id: " << i << " peso: " << l.weight_node[nodes[i]] << endl;
+        #endif
+
         tempo[i] = model.addVar(0.0, total_time, l.weight_node[nodes[i]], GRB_CONTINUOUS, "t");
 }
 
@@ -559,7 +566,9 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     }
 
     model.addConstr(tempo[l.g.id(l.depot)] == 0);
+    #if DEBUG
     cout << "depot id: " << l.g.id(l.depot) << endl;
+    #endif
     // v = tempo[]
     // vj >= vi + tij - (1-xij)M
 
@@ -603,14 +612,17 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
       int len;
 
       findsubtour(n, sol, &len, tour);
+      
+      #if DEBUG
       if(len < n) cout << "eita" << endl;
+      #endif
 
-      cout << "Tour: ";
+      //cout << "Tour: ";
       for (i = 0; i < len; i++){
-        cout << tour[i] << " ";
+        //cout << tour[i] << " ";
         s.tour.push_back(nodes[tour[i]]);
       }
-      cout << endl;
+      //cout << endl;
 
       for (i = 0; i < n; i++)
         delete[] sol[i];
@@ -619,7 +631,8 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
       s.cost = model.getObjective().getValue();
 
-      return false;
+      if (model.get(GRB_IntAttr_Status) == GRB_TIME_LIMIT)
+          return false;
 
     }
 
@@ -631,7 +644,7 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     }
 
 
-    //return naive(l, s, tl);
+    return true;
 }
 //------------------------------------------------------------------------------
 bool naive(const Tsp_P_Instance &instance, Tsp_P_Solution  &sol, int tl)
