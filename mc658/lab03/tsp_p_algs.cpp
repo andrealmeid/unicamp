@@ -30,7 +30,7 @@
 
 /* if META_2OPT, meta-heuristic will use 2-OPT to find a neighbor
    else, it will use getRandomNeighbor function */
-#define META_2OPT false
+#define META_2OPT true
 
 class tsp_p_Decoder {
 public:
@@ -511,7 +511,7 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     GRBVar *tempo = new GRBVar[n];
 
     // calculates the sum of all times
-    // find most pesado arc
+    // find most heaviest arc
     double total_time = 0;
     double biggest_time = 0;
     for(ListDigraph::ArcIt arc(l.g); arc != INVALID; ++arc){
@@ -526,16 +526,13 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 	cout << "pesadaum " << total_time << endl;
     #endif
 
-    // vetor de nos
-    //vector<int> nodes_id;
+    // array to store the nodes indexes according to Lemon order
     vector<DNode> nodes(n);
     for(ListDigraph::NodeIt node(l.g); node != INVALID; ++node){
-        //nodes_id.push_back(l.g.id(node));
         nodes[l.g.id(node)] = node;
     }
 
-
-    // tempo de cada no
+    // time of each node
     i = 0;
     for(int i = 0; i < n; i++){
         #if DEBUG
@@ -545,7 +542,7 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
         tempo[i] = model.addVar(0.0, total_time, l.weight_node[nodes[i]], GRB_CONTINUOUS, "t");
 }
 
-    // x_ij = variavel que determina se arco esta ou nao na solucao
+    // x_ij = var that sets if an arc is on the solution
     for (i = 0; i < n; i++) {
         for (j = 0; j < n; j++) {
             x[i][j] = model.addVar(0.0, 1.0, 0, GRB_BINARY, "x");
@@ -553,7 +550,6 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     }
 
     // sum x_ij = 2
-    // Degree-2 constraints
     for (i = 0; i < n; i++) {
       GRBLinExpr expr_in = 0;
       GRBLinExpr expr_out = 0;
@@ -569,25 +565,15 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     #if DEBUG
     cout << "depot id: " << l.g.id(l.depot) << endl;
     #endif
-    // v = tempo[]
-    // vj >= vi + tij - (1-xij)M
-
 
     for (j = 0; j < n; j++){
         if (j == l.g.id(l.depot)) continue;
-
         for (i = 0; i < n; i++){
-           // if (i == j)
-           //     x[i][i].set(GRB_DoubleAttr_UB, 0);
 
-            //else {
             double value = l.weight[findArc(l.g, nodes[i], nodes[j])];
-                model.addConstr(tempo[j] >= tempo[i] + value - (1 - x[i][j]) * total_time);
-            //}
+            model.addConstr(tempo[j] >= tempo[i] + value - (1 - x[i][j]) * total_time);
         }
     }
-     // cout << "arco(" << i << "," << j << "): " << value << endl;
-    // vj <= vi + tij + (1-xij)M
 
     // sum x_ii = 0
     for (i = 0; i < n; i++)
