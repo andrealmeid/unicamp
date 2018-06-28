@@ -10,6 +10,7 @@
  * DIGITE SEU RA: 164047
  * SUBMETA SOMENTE ESTE ARQUIVO */
 
+// System libs
 #include <iostream>
 #include <float.h>
 #include <math.h>
@@ -20,6 +21,7 @@
 #include <unistd.h>
 #include <time.h>
 
+// Project libs
 #include "mygraphlib.h"
 #include "tsp_p_algs.h"
 #include "MTRand.h"
@@ -28,10 +30,7 @@
 
 #define DEBUG 0
 
-/* if META_2OPT, meta-heuristic will use 2-OPT to find a neighbor
-   else, it will use getRandomNeighbor function */
-#define META_2OPT true
-
+// BRKGA decoder class to TSP-P problem
 class tsp_p_Decoder {
 public:
 	tsp_p_Decoder(const Tsp_P_Instance& instance);
@@ -43,7 +42,7 @@ private:
 	const Tsp_P_Instance& instance;
 };
 
-
+// function to check if 
 void findsubtour(int n, double** sol, int* tourlenP, int* tour);
 
 
@@ -227,11 +226,16 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     return false;
 }
 
-//------------------------------------------------------------------------------
-#define INITAL_TEMPERATURE 1000
+//------------------------------------------------------------------------------//
+
+/* if META_2OPT, meta-heuristic will use 2-OPT to find a neighbor
+   else, it will use getRandomNeighbor function */
+#define META_2OPT true
+
+#define INITAL_TEMPERATURE 2000
 #define MIN_TEMPERATURE 10
-#define INNER_LIMIT 1000 // inner loop limit
-#define ALPHA_PARAM 0.99 // alpha parameter of geometric decay
+#define INNER_LIMIT 300 // inner loop limit
+#define ALPHA_PARAM 0.96 // alpha parameter of geometric decay
 #define K_PARAM 2 // k parameter that multiplies temperature
 
 bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
@@ -508,7 +512,9 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
     for (i = 0; i < n; i++)
         x[i] = new GRBVar[n];
 
-    GRBVar *tempo = new GRBVar[n];
+
+
+    GRBVar *time = new GRBVar[n];
 
     // calculates the sum of all times
     // find most heaviest arc
@@ -539,7 +545,7 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
         cout << "id: " << i << " peso: " << l.weight_node[nodes[i]] << endl;
         #endif
 
-        tempo[i] = model.addVar(0.0, total_time, l.weight_node[nodes[i]], GRB_CONTINUOUS, "t");
+        time[i] = model.addVar(0.0, total_time, l.weight_node[nodes[i]], GRB_CONTINUOUS, "t");
 }
 
     // x_ij = var that sets if an arc is on the solution
@@ -548,6 +554,15 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
             x[i][j] = model.addVar(0.0, 1.0, 0, GRB_BINARY, "x");
         }
     }
+
+	for (i = 0; i < n; i++)
+	    for (j = 0; j < n; j++)
+		x[i][j].set(GRB_DoubleAttr_Start, 0);
+
+	// define cutoff value from heuristic solution
+	Tsp_P_Solution heuristic_solution;
+	constrHeur(l, heuristic_solution, tl);
+	model.getEnv().set(GRB_DoubleParam_Cutoff, heuristic_solution.cost);
 
     // sum x_ij = 2
     for (i = 0; i < n; i++) {
@@ -561,7 +576,7 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
       model.addConstr(expr_in == 1);
     }
 
-    model.addConstr(tempo[l.g.id(l.depot)] == 0);
+    model.addConstr(time[l.g.id(l.depot)] == 0);
     #if DEBUG
     cout << "depot id: " << l.g.id(l.depot) << endl;
     #endif
@@ -571,7 +586,7 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
         for (i = 0; i < n; i++){
 
             double value = l.weight[findArc(l.g, nodes[i], nodes[j])];
-            model.addConstr(tempo[j] >= tempo[i] + value - (1 - x[i][j]) * total_time);
+            model.addConstr(time[j] >= time[i] + value - (1 - x[i][j]) * total_time);
         }
     }
 
@@ -597,18 +612,23 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
       int* tour = new int[n];
       int len;
 
+	vector<int> tour2(n);
+
       findsubtour(n, sol, &len, tour);
       
       #if DEBUG
       if(len < n) cout << "eita" << endl;
       #endif
-
-      //cout << "Tour: ";
+      
       for (i = 0; i < len; i++){
         //cout << tour[i] << " ";
+	tour2[i] = tour[i];
         s.tour.push_back(nodes[tour[i]]);
       }
       //cout << endl;
+
+      int cost = pathCost(l, tour2);
+	cout << cost << endl;
 
       for (i = 0; i < n; i++)
         delete[] sol[i];
@@ -631,50 +651,6 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
 
     return true;
-}
-//------------------------------------------------------------------------------
-bool naive(const Tsp_P_Instance &instance, Tsp_P_Solution  &sol, int tl)
-/*
-    *This simple algorithm just computes a tour by choosing the outArc with lowest t_a.
-    *This tour, of course, begins at node s (depot);
-*/
-{
-   DNode v, vl;
-   sol.tour.clear();
-   sol.cost = 0.0;
-
-   v = instance.depot;//tour begins at s
-   sol.tour.push_back(v);
-
-   double vl_arc, sum_ta;
-   OutArcIt arc_min;
-   int i;
-
-
-   sum_ta=0.0;
-
-   while((int)sol.tour.size() < instance.n){
-        vl_arc = DBL_MAX;
-
-        for (OutArcIt a(instance.g, sol.tour.back()); a != INVALID; ++a){
-
-            i = 0;
-            while(i < (int)sol.tour.size() && instance.g.target(a) != sol.tour[i]) i++;
-            if(i < (int)sol.tour.size()) continue;
-
-            if(instance.weight[a] <= vl_arc){
-
-                vl_arc = instance.weight[a];
-                arc_min = a;
-            }
-        }
-        sum_ta += instance.weight[arc_min];
-        sol.cost += instance.weight_node[instance.g.target(arc_min)] * sum_ta;
-        vl = instance.g.target(arc_min);
-        sol.tour.push_back(vl);
-
-    }
-    return false;
 }
 //------------------------------------------------------------------------------
 
