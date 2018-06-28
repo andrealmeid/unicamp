@@ -29,9 +29,6 @@
 #include "BRKGA.h"
 #include "gurobi_c++.h"
 
-// flag to print debug outputs
-#define DEBUG 0
-
 // BRKGA decoder class to TSP-P problem
 class tsp_p_Decoder {
 public:
@@ -104,13 +101,6 @@ double pathCost(const Tsp_P_Instance &l, vector<int> path);
 
 // get a random neighbor of a tour
 vector<int> getRandomNeighbor(vector<int> v, int tour_size);
-
-// prints the vector
-void printVector(vector<int> v){
-	for(int i = 0; i < (int)v.size(); i++)
-	cout << v[i] << " ";
-	cout << endl;
-}
 
 // compartor to compare a pair chromosome-vector
 bool comparator (pair<int, double> i, pair<int, double> j);
@@ -462,7 +452,8 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 		// turn off Gurobi verbose output
 		model.set(GRB_IntParam_OutputFlag, 0);
 
-		model.getEnv().set(GRB_IntParam_Threads, 1);
+		// set the max num of threads to one
+		// model.getEnv().set(GRB_IntParam_Threads, 1);
 
 		// calculates heuristic time spent
 		time_t heur_time_a = time(nullptr);
@@ -498,7 +489,7 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 		for(ListDigraph::ArcIt arc(l.g); arc != INVALID; ++arc){
 			double current_time = l.weight[arc];
 			if(current_time > biggest_time)
-			biggest_time = current_time;
+				biggest_time = current_time;
 		}
 
 		total_time = biggest_time * n;
@@ -510,13 +501,8 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 		}
 
 		// time of each node
-		for(int i = 0; i < n; i++){
-			#if DEBUG
-			cout << "id: " << i << " peso: " << l.weight_node[nodes[i]] << endl;
-			#endif
-
+		for(int i = 0; i < n; i++)
 			time[i] = model.addVar(0.0, total_time, l.weight_node[nodes[i]], GRB_CONTINUOUS, "t");
-		}
 
 		for (int i = 0; i < n; i++)
 			for (int j = 0; j < n; j++)
@@ -536,9 +522,6 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
 		// depot should always be the first vertex
 		model.addConstr(time[l.g.id(l.depot)] == 0);
-		#if DEBUG
-		cout << "depot id: " << l.g.id(l.depot) << endl;
-		#endif
 
 		for (int i = 0; i < n; i++){
 			if (i == l.g.id(l.depot)) continue;
@@ -574,10 +557,6 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 			vector<int> tour_indexes(n);
 
 			findsubtour(n, sol, &len, tour);
-
-			#if DEBUG
-			if(len < n) cout << "eita" << endl;
-			#endif
 
 			for (int i = 0; i < len; i++){
 				tour_indexes[i] = tour[i];
