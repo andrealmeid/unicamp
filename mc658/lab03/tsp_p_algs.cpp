@@ -148,8 +148,8 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 	vector<int> path;
 	path.push_back(depot_id);
 
-	DNode source, target;
 	// auxiliar variables
+	DNode source, target;
 	int lowest_cost = (int) DBL_MAX;
 	int lowest_id = 0;
 	int id_to_remove = 0;
@@ -183,6 +183,7 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 			}
 		}
 
+		// update cost
 		target = l.g.nodeFromId(lowest_id);
 		Arc min_arc = findArc(l.g, source, target);
 		int min_arc_peso =  l.weight[min_arc];
@@ -204,7 +205,7 @@ bool constrHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 	return false;
 }
 
-//------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 /* if META_2OPT, meta-heuristic will use 2-OPT to find a neighbor
    else, it will use getRandomNeighbor function */
@@ -244,12 +245,11 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 	Tsp_P_Solution constrSolution;
 	constrHeur(l, constrSolution, tl);
 
-	// initial path from constrHeur
+	// initial path and cost from constructive heuristic
 	for(int i = 1; i < tour_size; i++){
 		current_path[i] = l.g.id(constrSolution.tour[i]);
 	}
-
-	int current_value = pathCost(l, current_path);
+	int current_value = constrSolution.cost;
 
 	// variables to store global best values
 	int best_value = current_value;
@@ -266,11 +266,11 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 			}
 
 			// neighbor solution = 2-OPT or random neighbor
-			#if META_2OPT
+#if META_2OPT
 			vector<int> neighbor_path = opt2(current_path, l);
-			#else
+#else
 			vector<int> neighbor_path = getRandomNeighbor(current_path, tour_size - 1);
-			#endif
+#endif
 
 			int neighbor_value = pathCost(l, neighbor_path);
 
@@ -296,7 +296,7 @@ bool metaHeur(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 				double e = exp(param);
 
 				// gets the new value
-				if (e > random_value){
+				if (random_value < e){
 					current_path = neighbor_path;
 					current_value = neighbor_value;
 				}
@@ -409,7 +409,7 @@ bool brkga(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 	// fill vector with vertexes ordered by index
 	for(unsigned i = 0, j = 0; i < tour_size; i++, j++) {
 		if((int) i == depot_id)
-		j++;
+			j++;
 		tour[i] = make_pair(j, bestChromosome[i]);
 	}
 
@@ -525,8 +525,8 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
 		for (int i = 0; i < n; i++){
 			if (i == l.g.id(l.depot)) continue;
+			
 			for (int j = 0; j < n; j++){
-
 				double value = l.weight[findArc(l.g, nodes[j], nodes[i])];
 				model.addConstr(
 					time[i] >= time[j] + value - (1 - x[j][i]) * total_time
