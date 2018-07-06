@@ -525,7 +525,7 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
 		for (int i = 0; i < n; i++){
 			if (i == l.g.id(l.depot)) continue;
-			
+
 			for (int j = 0; j < n; j++){
 				double value = l.weight[findArc(l.g, nodes[j], nodes[i])];
 				model.addConstr(
@@ -558,13 +558,14 @@ bool exact(const Tsp_P_Instance &l, Tsp_P_Solution  &s, int tl)
 
 			findsubtour(n, sol, &len, tour);
 
+			// fill the final tour with the solution from gurobi
 			for (int i = 0; i < len; i++){
 				tour_indexes[i] = tour[i];
 				s.tour.push_back(nodes[tour[i]]);
 			}
 
-			int cost = pathCost(l, tour_indexes);
-			s.cost = cost;
+			// calculates the cost from the final tour
+			s.cost = pathCost(l, tour_indexes);
 
 			for (int i = 0; i < n; i++)
 				delete[] sol[i];
