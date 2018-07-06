@@ -1,0 +1,32 @@
+300 ,  600 , relu  ,  adam  , 0.3681
+300 ,  600 , logistic  ,  adam  , 0.3467
+300 ,  600 , relu  ,  lbfgs  , 0.1723
+300 ,  600 , logistic  ,  lbfgs  , 0.3721
+800 ,  600 , relu  ,  adam  , 0.3484
+800 ,  600 , logistic  ,  adam  , 0.3554
+800 ,  600 , relu  ,  lbfgs  , 0.1988
+800 ,  600 , logistic  ,  lbfgs  , 0.3436
+1400 ,  600 , relu  ,  adam  , 0.3762
+1400 ,  600 , logistic  ,  adam  , 0.3777
+1400 ,  600 , relu  ,  lbfgs  , 0.3895
+1400 ,  600 , logistic  ,  lbfgs  , 0.3504
+2000 ,  600 , relu  ,  adam  , 0.3763
+2000 ,  600 , logistic  ,  adam  , 0.3867
+2000 ,  600 , relu  ,  lbfgs  , 0.3959
+2000 ,  600 , logistic  ,  lbfgs  , 0.3554
+300,  1400  , relu  ,  adam  , 0.3796
+300,  1400  , logistic  ,  adam  , 0.3497
+300,  1400  , relu  ,  lbfgs  , 0.3551
+300,  1400  , logistic  ,  lbfgs  , 0.3678
+800,  1400  , relu  ,  adam  , 0.3704
+800,  1400  , logistic  ,  adam  , 0.349
+800,  1400  , relu  ,  lbfgs  , 0.3684
+800,  1400  , logistic  ,  lbfgs  , 0.3394
+1400,  1400  , relu  ,  adam  , 0.3722
+1400,  1400  , logistic  ,  adam  , 0.381
+1400,  1400  , relu  ,  lbfgs  , 0.1995
+1400,  1400  , logistic  ,  lbfgs  , 0.3529
+2000,  1400  , relu  ,  adam  , 0.3947
+2000,  1400  , logistic  ,  adam  , 0.3906
+2000,  1400  , relu  ,  lbfgs  , 0.3851
+2000,  1400  , logistic  ,  lbfgs  , 0.352

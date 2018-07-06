@@ -1,0 +1,207 @@
+stopwords: True  stem: wn
+Number of clusters: 47
+scr:  -18594.048190517842
+Cluster  0 (  91 docs):  insurance abortion health pay coverage private geico premium dzkrizocfberkeleyedu dennis
+Cluster  1 ( 498 docs):  church bible faith christ catholic jesus scripture christianity truth love
+Cluster  2 ( 121 docs):  objective value odwyer frank morality frankd012s658uucp values moral science subjective
+Cluster  3 (  56 docs):  msg food chinese restaurant glutamate reaction eat taste allergic effect
+Cluster  4 ( 561 docs):  hockey win fan goal playoff cup espn leaf season detroit
+Cluster  5 ( 555 docs):  speed engine ford dealer cars clutch brake auto mustang tire
+Cluster  6 ( 177 docs):  scsi ide controller bus scsi2 isa scsi1 dma device seagate
+Cluster  7 ( 217 docs):  graphic 3d bmug library graphics photography picture package code format
+Cluster  8 ( 137 docs):  sin mary jesus grace turkey hate gods love christ baptism
+Cluster  9 ( 157 docs):  __ ___ ____ _____ ______ _______ l_l ________ baalkekelvinjplnasagov baalke
+Cluster 10 ( 259 docs):  atheist religion atheism belief faith exist existence christianity religious theist
+Cluster 11 ( 144 docs):  mouse port serial com modem keyboard com1 parallel interrupt irq
+Cluster 12 ( 185 docs):  science theory evolution universe scientific model hole atom horizon black
+Cluster 13 (1168 docs):  server application code ftp manager widget motif display user windows
+Cluster 14 ( 157 docs):  font printer print laser fonts truetype deskjet hp postscript driver
+Cluster 15 (6950 docs):  posting reply steve appreciated technology michael board jim net mike
+Cluster 16 ( 147 docs):  nsa sternlight excepted omission trust accuracy ensure strnlghtnetcomcom clipper error
+Cluster 17 ( 170 docs):  homosexual clayton cramer gay men sexual homosexuality sex crameroptilinkcom male
+Cluster 18 ( 258 docs):  encryption clipper chip escrow privacy algorithm crypto security secure wiretap
+Cluster 19 ( 265 docs):  clinton tax president federal house white congress mr bush administration
+Cluster 20 ( 114 docs):  moral morality cobbalexialisuiucedu cobb immoral objective jon keith tax society
+Cluster 21 ( 412 docs):  fbi fire batf koresh compound gas started warrant davidians atf
+Cluster 22 ( 249 docs):  monitor video color vga apple screen monitors nanao nec mac
+Cluster 23 ( 280 docs):  chip clipper algorithm secret serial escrow cpu s1 fpu fan
+Cluster 24 ( 443 docs):  bike dod ride riding dog helmet rider motorcycle bmw honda
+Cluster 25 ( 157 docs):  police detector radar cop officer detectors cops gun warrant court
+Cluster 26 ( 216 docs):  jesus christ georgia covington 706 heaven mcovingtaiugaedu 5420358 306027415 n4tmi
+Cluster 27 ( 288 docs):  driver video ati diamond mode drivers memory ultra vlb windows
+Cluster 28 ( 210 docs):  image color format gif display images xv 24 screen processing
+Cluster 29 ( 183 docs):  muslim islam islamic serb bosnian muslims gregg religion bosnia rushdie
+Cluster 30 ( 342 docs):  player baseball hockey nhl league players season stats fan roger
+Cluster 31 ( 271 docs):  copy protection copies author text tape installed goshi floppyburn windowscrash
+Cluster 32 ( 116 docs):  armenian turkish armenia genocide turk muslim xsoviet extermination 1920 soviet
+Cluster 33 ( 252 docs):  amp circuit audio output voltage ground radio wire signal input
+Cluster 34 ( 266 docs):  gun firearm guns crime weapon criminal militia amendment handgun safety
+Cluster 35 ( 248 docs):  disk floppy boot hd pc controller mac bios install formatted
+Cluster 36 ( 406 docs):  orbit shuttle launch moon mission nasa henry solar spencer satellite
+Cluster 37 ( 360 docs):  israel israeli arab jew palestinian jewish lebanese peace gaza lebanon
+Cluster 38 (  72 docs):  battery concrete discharge floor temperature batteries charger lead dead stored
+Cluster 39 ( 106 docs):  simms captain simm traded 256k meg vram memory ram apple
+Cluster 40 ( 420 docs):  doctor disease medical patient treatment gordon cancer pain skepticism n3jxp
+Cluster 41 ( 173 docs):  oil water dod shaft chain wheelie engine wheel drain shaftdrive
+Cluster 42 ( 114 docs):  turkish greek turkey armenian maxaxaxaxaxaxaxaxaxaxaxaxaxaxax armenia turk greece cyprus azerbaijan
+Cluster 43 ( 516 docs):  sale offer shipping condition asking sell excellent manual cd 25
+Cluster 44 ( 161 docs):  mailing sox subscribe red mets rpicasportoinescnpt knoxs stadium lost junk
+Cluster 45 ( 316 docs):  mac modem apple pc internal port serial hardware cable baud
+Cluster 46 ( 429 docs):  pitcher hit win ball pitching hitter pitch morris season batting
+stopwords: True  stem: lanc
+Number of clusters: 47
+scr:  -18567.64977765851
+Cluster  0 ( 168 docs):  ___ __ ____ _____ ______ _______ l_l ________ lab baalkekelvinjplnasagov
+Cluster  1 ( 201 docs):  mor object odwyer valu frank objective frankd012s658uucp morality values moral
+Cluster  2 ( 367 docs):  win goal season cup scor leaf detroit playoff captain boston
+Cluster  3 ( 866 docs):  oil engin bmw ford cars dod front hond brak wheel
+Cluster  4 ( 157 docs):  san maxaxaxaxaxaxaxaxaxaxaxaxaxaxax francisco jos diego ca adl shark 619 fans
+Cluster  5 ( 406 docs):  ftp mac sit unix pc via access anonym cod bbs
+Cluster  6 ( 377 docs):  graph display col 3d 24 screen vga mod colo 256
+Cluster  7 ( 433 docs):  fbi batf fir koresh compound gas bds atf waco fire
+Cluster  8 ( 189 docs):  turk arm armen turkey genocid greek muslim 1920 xsoviet soviet
+Cluster  9 ( 368 docs):  spac moon nas shuttl launch sky orbit lun space satellit
+Cluster 10 ( 180 docs):  church cathol christ marry christian mary bibl orthodox scripture reform
+Cluster 11 ( 302 docs):  hello xterm icon x11r5 xdm patch atom curs display manager
+Cluster 12 ( 332 docs):  board motherboard bus mhz cpu vlb spee ram chip upgrad
+Cluster 13 (6380 docs):  reply advance pric phon appreciated test apprecy michael sale contact
+Cluster 14 ( 304 docs):  jes sin christ jesus christians gods christian lov lord bibl
+Cluster 15 ( 419 docs):  dos windows os2 mem 31 video diamond instal machin swap
+Cluster 16 ( 241 docs):  print font printer las hp deskjet fonts postscrib atm ink
+Cluster 17 ( 246 docs):  ath relig atheism religion exist fai religy faith atheists atheist
+Cluster 18 (  44 docs):  georg 706 covington n4tmi 5420358 306027415 mcovingtaiugaedu athens usa intellig
+Cluster 19 ( 213 docs):  monit monitor video vga screen col monitors appl nec 17
+Cluster 20 ( 562 docs):  bibl christian christians christianity pray bible evid fai lov truth
+Cluster 21 ( 378 docs):  encrypt nsa escrow des sternlight sec phon clip crypto pgp
+Cluster 22 ( 147 docs):  helmet turkey bmug her truelov ninjait views leftov biker 9194608302
+Cluster 23 ( 199 docs):  modem port ser connect baud 2400 mac extern intern pin
+Cluster 24 ( 189 docs):  homosex sex clayton gay men cramer cram crameroptilinkcom promiscu mal
+Cluster 25 (  65 docs):  pts pit bos chi period det vs nyi pp tor
+Cluster 26 (  95 docs):  widget expos gl widgets draw null mot athen handl cod
+Cluster 27 ( 137 docs):  scsi drive scsi2 bus scsi1 mac disk dev pc dma
+Cluster 28 (  66 docs):  battery charg concret discharg stor dead batteries temp camter28astroocistempleedu acid
+Cluster 29 ( 146 docs):  islam muslim serb bosn muslims gregg cro bcci jaegerbuphybuedu religy
+Cluster 30 ( 237 docs):  gun guns weapon firearm crimin crim carry handgun saf pol
+Cluster 31 ( 197 docs):  convert gif oo bmp tiff format jpeg files pcx andre_beckirsinftudresdend
+Cluster 32 (1154 docs):  tax clinton fed drug presid constitut civil milit freedom polit
+Cluster 33 ( 102 docs):  mous keyboard mouse adb appl button c650 ser jump smooth
+Cluster 34 (  56 docs):  msg food chines eat resta react allerg study flav glutam
+Cluster 35 ( 323 docs):  disk floppy drive boot mac instal disks 35 mb hd
+Cluster 36 ( 374 docs):  bik rid dod dog bike motorcyc wav road harley lean
+Cluster 37 ( 330 docs):  hockey espn nhl fan game basebal playoff watch abc canad
+Cluster 38 ( 207 docs):  israel arab palestin lebanes lebanon jew gaz policy peac attack
+Cluster 39 ( 403 docs):  amp detect circuit output volt rad audio radio input ground
+Cluster 40 (  71 docs):  ray gamm burst oort energy cloud detect pat star galact
+Cluster 41 ( 463 docs):  med doct heal ins paty tre pain gordon diseas skepticism
+
+Cluster 42 ( 226 docs):  appl sim lc simms slot mac pds fpu nub meg
+Cluster 43 ( 185 docs):  orbit launch henry henryzootorontoedu hst zoolog utzoohenry spent toronto sol
+Cluster 44 ( 432 docs):  pitch hit bat win game season scor basebal brav bal
+Cluster 45 ( 225 docs):  jew arab israel jews palestin holocaust yassin zion land jewish
+Cluster 46 ( 231 docs):  chip encrypt clip algorithm escrow sec secret clipper wiretap phon
+stopwords: True  stem: snow
+Number of clusters: 47
+scr:  -18562.842411653663
+Cluster  0 ( 157 docs):  __ ___ ____ _____ ______ _______ l_l ________ baalkekelvinjplnasagov lab
+Cluster  1 (  90 docs):  object odwyer valu frank frankd012s658uucp values moral scienc relativ truth
+Cluster  2 ( 307 docs):  player hockey nhl leagu captain stat season trade career players
+Cluster  3 ( 582 docs):  bike ride dod motorcycl dog helmet bmw rider wave front
+Cluster  4 ( 307 docs):  san polic court cop ca jose francisco trial adl diego
+Cluster  5 ( 307 docs):  encrypt nsa des pgp sternlight secur algorithm trust rsa excepted
+Cluster  6 ( 641 docs):  engin oil dealer ford brake mile cars honda speed clutch
+Cluster  7 ( 262 docs):  monitor maxaxaxaxaxaxaxaxaxaxaxaxaxaxax color screen video vga appl nec nanao 17
+Cluster  8 ( 107 docs):  armenian turkish greek turkey armenia azeri turk azerbaijan cyprus azerbaijani
+Cluster  9 ( 269 docs):  driver diamond ati drivers video mous 31 ultra ftp mode
+Cluster 10 ( 141 docs):  tape backup dortmund tapes fourdcom 6174940565 video sale 250 copi
+Cluster 11 ( 143 docs):  object atom horizon observ model hole smiley event black gravity
+Cluster 12 ( 377 docs):  mac appl lc nubus quadra fpu pds c650 iisi slot
+Cluster 13 ( 462 docs):  religion atheist islam faith belief atheism truth religi argument muslim
+Cluster 14 ( 100 docs):  batteri stove concret cool discharg electr cold battery tower floor
+Cluster 15 ( 376 docs):  orbit launch shuttl moon nasa earth mission lunar satellit hst
+Cluster 16 (  79 docs):  insur health abort privat coverag premium insurance coverage dzkrizocfberkeleyedu abortion
+Cluster 17 ( 257 docs):  gun firearm crime weapon guns crimin carri handgun polic shoot
+Cluster 18 ( 494 docs):  doctor drug medic patient test treatment pain cancer diseas yeast
+Cluster 19 ( 317 docs):  chip clipper encrypt escrow secur algorithm wiretap crypto secret enforc
+Cluster 20 ( 297 docs):  disk floppi boot instal dos ide copi format hd 35
+Cluster 21 ( 390 docs):  pitch hit pitcher win bat ball hitter brave score sox
+Cluster 22 (  94 docs):  spencer henryzootorontoedu henri zoolog utzoohenri toronto svr3 kipl svr4 sunos
+Cluster 23 ( 105 docs):  israel isra lebanes lebanon palestinian arab peac attack hamid hernlem
+Cluster 24 ( 222 docs):  modem port serial com connect irq board pc baud extern
+Cluster 25 ( 523 docs):  fan win goal cup hockey season playoff leaf detroit score
+Cluster 26 ( 171 docs):  sin kent sandviknewtonapplecom jesus ksand alink christ grace hate cheers
+Cluster 27 ( 130 docs):  scsi ide scsi2 bus scsi1 dma devic isa disk cdrom
+Cluster 28 ( 110 docs):  armenian turkish armenia genocid turk muslim xsoviet 1920 serdar argic
+Cluster 29 ( 115 docs):  tax cobbalexialisuiucedu cobb clinton feder rais creationism incom middl vat
+Cluster 30 ( 184 docs):  homosexu clayton gay cramer men sexual sex crameroptilinkcom male promiscu
+Cluster 31 (  54 docs):  msg food chines restaur eat reaction allerg flavor olney glutam
+Cluster 32 ( 663 docs):  imag dos format ftp gif graphic convert os2 files display
+Cluster 33 ( 228 docs):  printer print font gebcadredslpittedu n3jxp chastiti intellect gordon skeptic surrend
+Cluster 34 ( 438 docs):  muslim war presid clinton bosnian libertarian militia serb mr constitut
+Cluster 35 ( 215 docs):  koresh children cult fbi atf waco mormon compound fire davidian
+Cluster 36 (6868 docs):  sale repli copi advance mike newsgroup michael compani jim appreciated
+Cluster 37 ( 268 docs):  isra arab jew israel palestinian jewish gaza polici jews land
+Cluster 38 ( 757 docs):  server widget applic display motif xterm x11r5 font code sun
+Cluster 39 ( 377 docs):  radio detector radar amp circuit georgia light ground wire led
+Cluster 40 ( 393 docs):  simm ram meg motherboard memori bus board mhz speed chip
+Cluster 41 ( 195 docs):  fbi fire gas compound tank tear bd koresh survivor children
+Cluster 42 (  97 docs):  espn hockey basebal abc watch coverag fan games night overtim
+Cluster 43 ( 282 docs):  church bibl cathol christ bible orthodox scriptur faith marriag pope
+Cluster 44 ( 118 docs):  batf warrant fbi fire search koresh noknock raid waco compound
+Cluster 45 ( 104 docs):  moral object morality jon keith immoral natur livesey liveseysolntzewpdsgicom murder
+Cluster 46 ( 220 docs):  jesus christ heaven bibl faith die son father messiah him
+stopwords: True  stem: porter
+Number of clusters: 47
+scr:  -18571.694797298293
+Cluster  0 ( 183 docs):  homosexu clayton gay cramer men sexual sex crameroptilinkcom male promiscu
+Cluster  1 ( 231 docs):  jim zionism sport wip jimfcenterlinecom frost jhartagoraraincom racism hart danni
+Cluster  2 ( 189 docs):  armenian turkish armenia turk turkey genocid muslim greek azeri xsoviet
+Cluster  3 ( 420 docs):  dod ticket dog motorcycl ride bmw cop biker ama road
+Cluster  4 ( 463 docs):  pitch hit player pitcher bat ball win hitter basebal score
+Cluster  5 ( 342 docs):  driver video diamond mode ati vesa bu color mous drivers
+Cluster  6 ( 291 docs):  disk floppi boot instal copi hd format bio pc machin
+Cluster  7 ( 443 docs):  jesu christ sin jesus heaven bibl faith lord hell die
+Cluster  8 ( 393 docs):  orbit launch shuttl moon mission earth solar hst satellit nasa
+Cluster  9 ( 325 docs):  bike ride dod helmet rider wave motorcycl honda bmw lean
+Cluster 10 (1996 docs):  children war death insur argument polic action mr countri ignor
+Cluster 11 ( 251 docs):  gun firearm weapon crime guns crimin handgun carri polic kratz
+Cluster 12 ( 785 docs):  sale board tape cd ship wire amp condition audio switch
+Cluster 13 ( 113 docs):  object odwyer valu frank frankd012s658uucp moral values scienc objective truth
+Cluster 14 ( 118 docs):  trade gm captain murray season shark trial ottawa traded san
+Cluster 15 (  80 docs):  font fonts atm truetyp tt charact printer print xterm default
+Cluster 16 ( 101 docs):  roger player maynard maynardramseycslaurentianca hockey gainey cordially rm always defens
+Cluster 17 ( 316 docs):  msg food theori georgia eat stove chines 706 scientif covington
+Cluster 18 ( 170 docs):  hockey espn basebal nhl abc fan coverag watch night canadian
+Cluster 19 ( 196 docs):  modem port serial com irq connect baud extern 2400 com4
+Cluster 20 ( 632 docs):  oil engin dealer ford mile honda brake cars clutch toyota
+Cluster 21 ( 421 docs):  ftp graphic site 3d code packag polygon routin directori anonym
+Cluster 22 ( 271 docs):  escrow clipper chip nsa sternlight secur tap crypto wiretap trust
+Cluster 23 (  77 docs):  batteri risc concret discharg battery instruct charg floor store temperatur
+Cluster 24 ( 155 docs):  __ ___ ____ _____ ______ _______ l_l ________ baalkekelvinjplnasagov nick
+Cluster 25 ( 398 docs):  fbi fire koresh batf compound bd children warrant atf davidian
+Cluster 26 ( 107 docs):  moral morality object jon keith immoral livesey liveseysolntzewpdsgicom murder natur
+Cluster 27 ( 294 docs):  atheist religion belief atheism faith truth religi theist argument evid
+Cluster 28 ( 280 docs):  chip cpu mhz speed clock clipper algorithm board fan motherboard
+Cluster 29 ( 140 docs):  scsi ide scsi2 scsi1 dma isa devic bu adaptec pc
+Cluster 30 ( 432 docs):  mac appl simm lc mous c650 centri iisi duo fpu
+Cluster 31 ( 206 docs):  encrypt chip clipper pgp algorithm secur encryption de privaci scheme
+Cluster 32 ( 141 docs):  printer print laser hp ink deskjet driver postscript page bj200
+Cluster 33 ( 154 docs):  imag color display images image gif jpeg screen 24 process
+Cluster 34 ( 123 docs):  widget motif event expos applic gl button code draw athena
+Cluster 35 ( 153 docs):  islam muslim bosnian serb muslims gregg khomeini religion quran croat
+Cluster 36 ( 256 docs):  israel arab isra jew palestinian jewish gaza polici land war
+Cluster 37 ( 345 docs):  clinton tax drug presid militia feder bush administr congress mr
+Cluster 38 ( 337 docs):  doctor medic patient treatment gordon gebcadredslpittedu n3jxp chastiti diseas yeast
+Cluster 39 (4687 docs):  advance test mike appreciated repli appreci scienc michael bob product
+Cluster 40 ( 907 docs):  server display applic code xterm manag user pc compil sun
+Cluster 41 ( 216 docs):  church cathol christ bibl orthodox pope canon faith scriptur scripture
+
+Cluster 42 ( 109 docs):  israel lebanes isra lebanon jake livni jakebony1bonycom americanoccupi jimmi carter
+Cluster 43 ( 475 docs):  win player goal fan season cup playoff leaf score detroit
+Cluster 44 ( 239 docs):  os2 detector ms radar nt microsoft maxaxaxaxaxaxaxaxaxaxaxaxaxaxax product app develop
+Cluster 45 ( 198 docs):  format convert gif tiff files bmp pcx imag postscript bitmap
+Cluster 46 ( 234 docs):  monitor vga color screen video appl nanao 17 monitors mag
+Kmeans: N°: 47 - score= -18594.048190517842Kmeans: N°: 47 - score= -18567.64977765851Kmeans: N°: 47 - score= -18562.842411653663Kmeans: N°: 47 - score= -18571.694797298293Kmeans: N°: 80 - score= -18372.54593453786
+
+stopwords: True  stem: wn
+Number of clusters: 80
+

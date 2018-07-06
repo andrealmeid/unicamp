@@ -1,0 +1,46 @@
+neuronios, activation, solver, score,loss
+700,  relu ,  lbfgs  , 0.1827,
+1600,  relu ,  lbfgs  , 0.2204,
+1900,  relu ,  lbfgs  , 0.2393,
+400,  logistic ,  adam  , 0.3292,
+100,  logistic ,  adam  , 0.3346,
+100,  relu ,  adam  , 0.3348,
+700,  logistic ,  lbfgs  , 0.3507,
+400,  relu ,  lbfgs  , 0.3558,
+700,  logistic ,  adam  ,357,
+1300,  logistic ,  lbfgs  , 0.3598,
+400,  logistic ,  lbfgs  , 0.3602,
+1000,  relu ,  lbfgs  , 0.3611,
+1000,  logistic ,  lbfgs  , 0.3615,
+100,  logistic ,  lbfgs  , 0.3675,
+1600,  logistic ,  lbfgs  , 0.3687,
+1300,  relu ,  lbfgs  , 0.3713,
+400,  relu ,  adam  ,372,
+1000,  logistic ,  adam  , 0.3753,
+1900,  logistic ,  lbfgs  , 0.3756,
+100,  relu ,  lbfgs  , 0.3825,
+1300,  logistic ,  adam  , 0.3872,
+1900,  logistic ,  adam  ,395,
+1600,  logistic ,  adam  , 0.3976,
+700,  relu ,  adam  , 0.3982,
+1000,  relu ,  adam  , 0.4116,
+1300,  relu ,  adam  , 0.4148,
+1600,  relu ,  adam  , 0.4183,
+1900,  relu ,  adam  , 0.4262,
+1700,  relu ,  adam  ,0.3942,
+1800,  relu ,  adam  ,0.3985,1.42108
+2300,  relu ,  adam  ,0.4116,1.58253
+10000,  relu ,  adam  ,0.4118,2.9910
+2200,  relu ,  adam  ,0.4129,1.6623
+1825,  relu ,  adam  ,0.4138,1.34206
+1950,  relu ,  adam  ,0.4149,1.53
+1850,  relu ,  adam  ,0.4154,1.18399
+5500,  relu ,  adam  ,0.4184,2.26290
+2000,  relu ,  adam  ,0.42,1.50397
+1875,  relu ,  adam  ,0.4201,1.0461
+1925,  relu ,  adam  ,0.4205,1.59042
+4000,  relu ,  adam  ,0.4207,2.7562
+2100,  relu ,  adam  ,0.4234,1.56066
+7500,  relu ,  adam  ,0.4274,2.64004
+6000,  relu ,  adam  ,0.4336,2.2307
+5000,  relu ,  adam  ,0.4399,1.9009

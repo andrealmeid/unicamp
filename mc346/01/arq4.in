@@ -1,0 +1,6 @@
+[a,b,c,d,e,f].
+[arco(f,d,14), arco(f,c,10), arco(f,b,13), arco(f,a,10), arco(d,f,5), arco(d,c,18),
+ arco(d,b,22), arco(d,a,23), arco(c,f,26), arco(c,d,25), arco(c,b,5), arco(c,a,16),
+ arco(b,f,4), arco(b,d,24), arco(b,c,8), arco(b,a,7), arco(a,f,12), arco(a,d,23),
+ arco(a,c,4), arco(a,b,23)].
+c.
