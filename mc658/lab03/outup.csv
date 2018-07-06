@@ -1,0 +1,15 @@
+mode; testname; status; time; cost; answer; accuracy
+teste10_1.txt; OK; 0 s; 4813; 2943; .61146;  
+teste10_2.txt; OK; 0 s; 5033; 4036; .80190;  
+teste11_1.txt; OK; 0 s; 3654; 3647; .99808;  
+teste11_2.txt; OK; 0 s; 9003; 4170; .46317;  
+teste12_1.txt; OK; 0 s; 7036; 3091; .43931;  
+teste12_2.txt; OK; 0 s; 4819; 3610; .74911;  
+teste13_1.txt; OK; 0 s; 10048; 5584; .55573;  
+teste13_2.txt; OK; 0 s; 14054; 9081; .64615;  
+teste14_1.txt; OK; 0 s; 19387; 11369; .58642;  
+teste14_2.txt; OK; 0 s; 20357; 3085; .15154;  
+teste15_1.txt; OK; 0 s; 33851; 9957; .29414;  
+teste15_2.txt; OK; 0 s; 23108; 8953; .38744;  
+teste50_1.txt; OK; 0 s; 1.13715e+06; none; none;  
+teste50_2.txt; OK; 0 s; 1.47161e+06; none; none;  
